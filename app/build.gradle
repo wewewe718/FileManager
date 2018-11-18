@@ -16,12 +16,25 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    dataBinding {
+        enabled = true
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
 }
 
 def supportVersion = '28.0.0'
+def rxJava2Version = '2.2.3'
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
+    // Android
     implementation "com.android.support:appcompat-v7:$supportVersion"
+    implementation "com.android.support:design:$supportVersion"
+
+    // RxJava 2
+    implementation "io.reactivex.rxjava2:rxjava:$rxJava2Version"
 }
