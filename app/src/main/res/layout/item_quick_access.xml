@@ -10,7 +10,7 @@
         android:layout_height="match_parent"
         android:layout_gravity="center"
         card_view:cardUseCompatPadding="true"
-        card_view:cardElevation="@dimen/quick_access_items_elevation"
+        card_view:cardElevation="@dimen/default_card_view_elevation"
         >
         <LinearLayout
             android:layout_width="wrap_content"

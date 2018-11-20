@@ -83,9 +83,11 @@ public class QuickAccessItemsAdapter extends BaseAdapter {
 
         QuickAccessItemViewModel model = data[position];
 
+        // Show quick access item icon
         ImageView iconView = convertView.findViewById(R.id.quick_access_item_icon_image_view);
         iconView.setBackgroundResource(model.iconId);
 
+        // Show quick access item name
         TextView textView = convertView.findViewById(R.id.quick_access_item_icon_text_view);
         textView.setText(model.textId);
 

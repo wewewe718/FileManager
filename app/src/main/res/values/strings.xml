@@ -7,4 +7,6 @@
     <string name="quick_access_item_documents">Documents</string>
     <string name="quick_access_item_apps">Apps</string>
     <string name="quick_access_item_downloads">Downloads</string>
+
+    <string name="storage_item_storage_space_format_string">%1$.2f / %2$.2f GB</string>
 </resources>
