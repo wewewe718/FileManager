@@ -1,4 +1,4 @@
-package com.example.filemanager.repository;
+package com.example.filemanager.repository.storage;
 
 import android.support.annotation.NonNull;
 

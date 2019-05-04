@@ -16,12 +16,26 @@ import java.util.Locale;
 
 
 public class StorageItemsAdapter extends RecyclerView.Adapter<StorageItemsAdapter.ViewHolder> {
+
+    public interface Listener {
+        void onStorageClicked(@NonNull StorageModel storageModel);
+    }
+
+
     private List<StorageModel> data = Collections.emptyList();
+    private Listener listener;
+
+
+    public StorageItemsAdapter(@NonNull Listener listener) {
+        this.listener = listener;
+    }
+
 
     public void setData(@NonNull List<StorageModel> data) {
         this.data = data;
         notifyDataSetChanged();
     }
+
 
     @NonNull
     @Override
@@ -33,7 +47,8 @@ public class StorageItemsAdapter extends RecyclerView.Adapter<StorageItemsAdapte
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
-        viewHolder.bind(data.get(i));
+        StorageModel storage = data.get(i);
+        viewHolder.bind(storage);
     }
 
     @Override
@@ -42,23 +57,26 @@ public class StorageItemsAdapter extends RecyclerView.Adapter<StorageItemsAdapte
     }
 
 
-    static class ViewHolder extends RecyclerView.ViewHolder {
+    class ViewHolder extends RecyclerView.ViewHolder {
         private ItemStorageBinding binding;
 
-        ViewHolder(@NonNull ItemStorageBinding binding) {
+        private ViewHolder(@NonNull ItemStorageBinding binding) {
             super(binding.getRoot());
             this.binding = binding;
         }
 
-        void bind(@NonNull StorageModel model) {
+        private void bind(@NonNull StorageModel model) {
             showStorageTypeImage(model);
             showStorageName(model);
             showStorageSpaceInTextView(model);
             showStorageSpaceInProgressBar(model);
+
+            itemView.setOnClickListener(v -> listener.onStorageClicked(model));
         }
 
         private void showStorageTypeImage(@NonNull StorageModel model) {
             int storageTypeImageId = -1;
+
             switch (model.getType()) {
                 case INTERNAL_STORAGE: {
                     storageTypeImageId = R.drawable.ic_internal_storage;

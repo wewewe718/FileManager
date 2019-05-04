@@ -25,7 +25,7 @@ import io.reactivex.disposables.Disposable;
 
 public class MainActivity extends AppCompatActivity {
     private CompositeDisposable viewModelDisposable = new CompositeDisposable();
-    private StorageItemsAdapter adapter = new StorageItemsAdapter();
+    private StorageItemsAdapter adapter = new StorageItemsAdapter(this::showStorageDirectoryActivity);
     private StorageListViewModel viewModel;
     private ActivityMainBinding binding;
 
@@ -63,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         binding.quickAccessItemsGridView.setNumColumns(columnNumber);
-        binding.quickAccessItemsGridView.setAdapter(new QuickAccessItemsAdapter(this, () -> {}));
+        binding.quickAccessItemsGridView.setAdapter(new QuickAccessItemsAdapter(this, this::showQuickAccessItemDirectoryActivity));
     }
 
     private void initStorageItemsRecyclerView() {
@@ -95,5 +95,14 @@ public class MainActivity extends AppCompatActivity {
 
     private void showStorageItems(@NonNull List<StorageModel> storageModels) {
         adapter.setData(storageModels);
+    }
+
+
+    private void showQuickAccessItemDirectoryActivity() {
+        DirectoryActivity.start(this, "");
+    }
+
+    private void showStorageDirectoryActivity(@NonNull StorageModel storageModel) {
+        DirectoryActivity.start(this, "");
     }
 }

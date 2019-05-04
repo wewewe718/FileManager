@@ -3,8 +3,8 @@ package com.example.filemanager.viewmodel;
 import android.arch.lifecycle.ViewModel;
 
 import com.example.filemanager.model.StorageModel;
-import com.example.filemanager.repository.MockStorageListRepository;
-import com.example.filemanager.repository.StorageListRepository;
+import com.example.filemanager.repository.storage.MockStorageListRepository;
+import com.example.filemanager.repository.storage.StorageListRepository;
 
 import java.util.List;
 
