@@ -27,7 +27,8 @@ android {
 
 def supportVersion = '28.0.0'
 def rxJava2Version = '2.2.3'
-def rxAndroidVersion = '2.0.1'
+def rxAndroidVersion = '2.1.1'
+def viewModelVersion = "1.1.1"
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
@@ -35,6 +36,9 @@ dependencies {
     // Android
     implementation "com.android.support:appcompat-v7:$supportVersion"
     implementation "com.android.support:design:$supportVersion"
+
+    // Android Architecture Components
+    implementation "android.arch.lifecycle:extensions:$viewModelVersion"
 
     // RxJava 2
     implementation "io.reactivex.rxjava2:rxjava:$rxJava2Version"

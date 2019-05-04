@@ -1,5 +1,6 @@
 package com.example.filemanager.activity;
 
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.res.Configuration;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
@@ -14,7 +15,7 @@ import com.example.filemanager.adapter.QuickAccessItemsAdapter;
 import com.example.filemanager.adapter.StorageItemsAdapter;
 import com.example.filemanager.databinding.ActivityMainBinding;
 import com.example.filemanager.model.StorageModel;
-import com.example.filemanager.repository.StorageListRepository;
+import com.example.filemanager.viewmodel.StorageListViewModel;
 
 import java.util.List;
 
@@ -23,13 +24,11 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 
 public class MainActivity extends AppCompatActivity {
-    private static final String STORAGE_ITEMS_RECYCLER_VIEW_VISIBILITY_KEY = "STORAGE_ITEMS_VISIBILITY_KEY";
-    private static final String STORAGE_ITEMS_PROGRESS_BAR_VISIBILITY_KEY = "STORAGE_ITEMS_PROGRESS_BAR_VISIBILITY_KEY";
-
-    private ActivityMainBinding binding;
-    private CompositeDisposable compositeDisposable = new CompositeDisposable();
-    private StorageListRepository storageListRepository = new StorageListRepository();
+    private CompositeDisposable viewModelDisposable = new CompositeDisposable();
     private StorageItemsAdapter adapter = new StorageItemsAdapter();
+    private StorageListViewModel viewModel;
+    private ActivityMainBinding binding;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,40 +36,26 @@ public class MainActivity extends AppCompatActivity {
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
 
-        loadStorageItems();
         initQuickAccessItemsView();
         initStorageItemsRecyclerView();
+
+        createViewModel();
     }
 
     @Override
-    public void onSaveInstanceState(@NonNull Bundle outState) {
-        super.onSaveInstanceState(saveInstanceState(outState));
+    protected void onStart() {
+        super.onStart();
+        subscribeToViewModel();
     }
 
     @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        restoreInstanceState(savedInstanceState);
-    }
-
-
-    private Bundle saveInstanceState(@NonNull Bundle outState) {
-        outState.putInt(STORAGE_ITEMS_RECYCLER_VIEW_VISIBILITY_KEY, binding.storageItemsRecyclerView.getVisibility());
-        outState.putInt(STORAGE_ITEMS_PROGRESS_BAR_VISIBILITY_KEY, binding.storageItemsLoadingProgressBar.getVisibility());
-        return outState;
-    }
-
-    private void restoreInstanceState(@Nullable Bundle savedInstanceState) {
-        if (savedInstanceState == null) {
-            return;
-        }
-
-        binding.storageItemsRecyclerView.setVisibility(savedInstanceState.getInt(STORAGE_ITEMS_RECYCLER_VIEW_VISIBILITY_KEY, View.GONE));
-        binding.storageItemsLoadingProgressBar.setVisibility(savedInstanceState.getInt(STORAGE_ITEMS_PROGRESS_BAR_VISIBILITY_KEY, View.GONE));
+    protected void onStop() {
+        super.onStop();
+        unsubscribeFromViewModel();
     }
 
 
     private void initQuickAccessItemsView() {
-        // Calculate number of columns
         int columnNumber = 3;
         int orientation = getResources().getConfiguration().orientation;
         if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
@@ -87,21 +72,28 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private void showStorageItems(@NonNull List<StorageModel> storageModels) {
-        binding.storageItemsLoadingProgressBar.setVisibility(View.GONE);
-        binding.storageItemsRecyclerView.setVisibility(View.VISIBLE);
-        adapter.setData(storageModels);
+    private void createViewModel() {
+        viewModel = ViewModelProviders.of(this).get(StorageListViewModel.class);
+    }
+
+    private void subscribeToViewModel() {
+        viewModelDisposable.addAll(
+                viewModel.isLoading.subscribe(this::showIsLoading),
+                viewModel.storageList.subscribe(this::showStorageItems)
+        );
+    }
+
+    private void unsubscribeFromViewModel() {
+        viewModelDisposable.clear();
     }
 
 
-    private void loadStorageItems() {
-        Disposable disposable = storageListRepository.getStorageList()
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(
-                        this::showStorageItems,
-                        Throwable::printStackTrace
-                );
+    private void showIsLoading(boolean isLoading) {
+        binding.storageItemsRecyclerView.setVisibility(isLoading ? View.GONE : View.VISIBLE);
+        binding.storageItemsLoadingProgressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
+    }
 
-        compositeDisposable.add(disposable);
+    private void showStorageItems(@NonNull List<StorageModel> storageModels) {
+        adapter.setData(storageModels);
     }
 }
