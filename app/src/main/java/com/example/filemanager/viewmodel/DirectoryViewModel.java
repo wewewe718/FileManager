@@ -2,9 +2,9 @@ package com.example.filemanager.viewmodel;
 
 import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProvider;
-import android.arch.lifecycle.ViewModelProviders;
 import android.support.annotation.NonNull;
 
+import com.example.filemanager.model.DirectoryItem;
 import com.example.filemanager.repository.directory.DirectoryRepository;
 import com.example.filemanager.repository.directory.MockDirectoryRepository;
 
@@ -13,7 +13,6 @@ import java.util.List;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
 import io.reactivex.subjects.BehaviorSubject;
 import io.reactivex.subjects.Subject;
 
@@ -24,7 +23,7 @@ public class DirectoryViewModel extends ViewModel {
     private String currentDirectory;
 
     public Subject<Boolean> isLoading = BehaviorSubject.createDefault(true);
-    public Subject<List<Object>> directoryContent = BehaviorSubject.create();
+    public Subject<List<DirectoryItem>> directoryContent = BehaviorSubject.create();
 
     public DirectoryViewModel(@NonNull String directory) {
         currentDirectory = directory;
@@ -36,7 +35,6 @@ public class DirectoryViewModel extends ViewModel {
 
         Disposable subscription = directoryRepository
                 .getDirectoryContent(currentDirectory)
-                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         result -> {

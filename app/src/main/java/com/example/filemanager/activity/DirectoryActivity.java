@@ -9,11 +9,14 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
 import android.view.MenuItem;
 import android.view.View;
 
 import com.example.filemanager.R;
+import com.example.filemanager.adapter.DirectoryItemsAdapter;
 import com.example.filemanager.databinding.ActivityDirectoryBinding;
+import com.example.filemanager.model.DirectoryItem;
 import com.example.filemanager.viewmodel.DirectoryViewModel;
 
 import java.util.List;
@@ -24,6 +27,7 @@ public class DirectoryActivity extends AppCompatActivity {
     private static final String DIRECTORY_INTENT_KEY = "DIRECTORY_INTENT_KEY";
 
     private CompositeDisposable viewModelDisposable = new CompositeDisposable();
+    private DirectoryItemsAdapter adapter = new DirectoryItemsAdapter(this::handleDirectoryItemClicked);
     private DirectoryViewModel viewModel;
     private ActivityDirectoryBinding binding;
 
@@ -38,9 +42,15 @@ public class DirectoryActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         binding = DataBindingUtil.setContentView(this, R.layout.activity_directory);
-        initActionBar();
-        createViewModel();
+
+        String directory = getIntent().getStringExtra(DIRECTORY_INTENT_KEY);
+
+        initActionBar(directory);
+        initDirectoryItemsRecyclerView();
+
+        createViewModel(directory);
     }
 
     @Override
@@ -65,18 +75,25 @@ public class DirectoryActivity extends AppCompatActivity {
     }
 
 
-    private void initActionBar() {
+    private void initActionBar(@NonNull String directory) {
         ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setHomeButtonEnabled(true);
-            actionBar.setDisplayHomeAsUpEnabled(true);
-            actionBar.setDisplayShowHomeEnabled(true);
+        if (actionBar == null) {
+            return;
         }
+
+        actionBar.setHomeButtonEnabled(true);
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setDisplayShowHomeEnabled(true);
+        actionBar.setTitle(directory);
+    }
+
+    private void initDirectoryItemsRecyclerView() {
+        binding.directoryContentRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        binding.directoryContentRecyclerView.setAdapter(adapter);
     }
 
 
-    private void createViewModel() {
-        String directory = getIntent().getStringExtra(DIRECTORY_INTENT_KEY);
+    private void createViewModel(@NonNull String directory) {
         viewModel = ViewModelProviders
                 .of(this, new DirectoryViewModel.Factory(directory))
                 .get(DirectoryViewModel.class);
@@ -99,7 +116,20 @@ public class DirectoryActivity extends AppCompatActivity {
         binding.directoryContentLoadingProgressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
     }
 
-    private void showDirectoryContent(@NonNull List<Object> directoryContent) {
+    private void showDirectoryContent(@NonNull List<DirectoryItem> directoryContent) {
+        if (directoryContent.isEmpty()) {
+            showDirectoryIsEmpty();
+        } else {
+            adapter.setData(directoryContent);
+        }
+    }
+
+    private void showDirectoryIsEmpty() {
+        binding.textViewEmptyDirectory.setVisibility(View.VISIBLE);
+    }
+
+
+    private void handleDirectoryItemClicked(@NonNull Object item) {
 
     }
 }

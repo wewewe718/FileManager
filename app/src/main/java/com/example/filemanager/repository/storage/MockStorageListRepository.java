@@ -24,7 +24,7 @@ public class MockStorageListRepository implements StorageListRepository {
     @NonNull
     public Single<List<StorageModel>> getStorageList() {
         return Single.just(storageModelList)
-                .delay(5000, TimeUnit.MILLISECONDS)
+                .delay(2000, TimeUnit.MILLISECONDS)
                 .subscribeOn(Schedulers.io());
     }
 }
