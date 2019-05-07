@@ -4,9 +4,12 @@ import android.databinding.DataBindingUtil;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
+import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.util.Pair;
 import android.view.LayoutInflater;
+import android.view.MenuInflater;
+import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.filemanager.R;
@@ -24,7 +27,7 @@ import java.util.Locale;
 public class DirectoryItemsAdapter extends RecyclerView.Adapter<DirectoryItemsAdapter.ViewHolder> {
 
     public interface Listener {
-        void onItemClicked(@NonNull DirectoryItem item);
+        void onDirectoryItemClicked(@NonNull DirectoryItem item);
     }
 
     private static final DateFormat DATE_FORMATTER = new SimpleDateFormat( "dd-MM-yyyy", Locale.ENGLISH);
@@ -73,7 +76,8 @@ public class DirectoryItemsAdapter extends RecyclerView.Adapter<DirectoryItemsAd
         }
 
         private void bind(@NonNull DirectoryItem item) {
-            binding.getRoot().setOnClickListener(v -> listener.onItemClicked(item));
+            binding.getRoot().setOnClickListener(v -> listener.onDirectoryItemClicked(item));
+            binding.imageViewMore.setOnClickListener(this::showPopupMenu);
 
             binding.textViewName.setText(item.getName());
             showDirectoryItemTypeImage(item);
@@ -128,6 +132,13 @@ public class DirectoryItemsAdapter extends RecyclerView.Adapter<DirectoryItemsAd
                 case GIGABYTE: return R.string.file_size_in_gb;
             }
             return -1;
+        }
+
+        private void showPopupMenu(@NonNull View view) {
+            PopupMenu popup = new PopupMenu(itemView.getContext(), view);
+            MenuInflater inflater = popup.getMenuInflater();
+            inflater.inflate(R.menu.menu_directory_item, popup.getMenu());
+            popup.show();
         }
     }
 }

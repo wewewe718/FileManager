@@ -23,6 +23,7 @@
             android:layout_marginTop="@dimen/default_padding"
             android:layout_alignParentTop="true"
             android:layout_toEndOf="@id/image_view_item_type"
+            android:layout_toStartOf="@id/image_view_more"
             android:textStyle="bold"
             tools:text="Directory or file"
             />
@@ -31,8 +32,19 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignStart="@id/text_view_name"
+            android:layout_alignEnd="@id/text_view_name"
             android:layout_below="@id/text_view_name"
             tools:text="File size or last modification time"
+            />
+        <ImageView
+            android:id="@+id/image_view_more"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:paddingStart="@dimen/default_padding"
+            android:paddingEnd="@dimen/default_padding"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:src="@drawable/ic_more"
             />
         <View
             android:layout_width="match_parent"

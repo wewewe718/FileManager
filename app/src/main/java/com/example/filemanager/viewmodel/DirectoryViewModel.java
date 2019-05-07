@@ -8,33 +8,65 @@ import com.example.filemanager.model.DirectoryItem;
 import com.example.filemanager.repository.directory.DirectoryRepository;
 import com.example.filemanager.repository.directory.MockDirectoryRepository;
 
+import java.util.EmptyStackException;
 import java.util.List;
+import java.util.Stack;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.subjects.BehaviorSubject;
+import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.Subject;
 
 public class DirectoryViewModel extends ViewModel {
     private CompositeDisposable disposable = new CompositeDisposable();
     private DirectoryRepository directoryRepository = new MockDirectoryRepository();
 
-    private String currentDirectory;
+    private Stack<String> directories = new Stack<>();
 
     public Subject<Boolean> isLoading = BehaviorSubject.createDefault(true);
+    public Subject<String> currentDirectory = BehaviorSubject.create();
     public Subject<List<DirectoryItem>> directoryContent = BehaviorSubject.create();
 
+    public Subject<Boolean> closeScreen = PublishSubject.create();
+
+
     public DirectoryViewModel(@NonNull String directory) {
-        currentDirectory = directory;
-        loadDirectoryContent();
+        goToDirectory(directory);
     }
 
-    private void loadDirectoryContent() {
+
+    public void goToParentDirectory() {
+        String parentDirectory;
+
+        try {
+            directories.pop();
+            parentDirectory = directories.pop();
+        } catch (EmptyStackException ex) {
+            parentDirectory = null;
+        }
+
+        if (parentDirectory == null) {
+            closeScreen.onNext(true);
+            return;
+        }
+
+        goToDirectory(parentDirectory);
+    }
+
+    public void goToDirectory(@NonNull String directory) {
+        directories.push(directory);
+        this.currentDirectory.onNext(directory);
+        loadDirectoryContent(directory);
+    }
+
+
+    private void loadDirectoryContent(@NonNull String directory) {
         isLoading.onNext(true);
 
         Disposable subscription = directoryRepository
-                .getDirectoryContent(currentDirectory)
+                .getDirectoryContent(directory)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         result -> {
@@ -49,6 +81,7 @@ public class DirectoryViewModel extends ViewModel {
 
         disposable.add(subscription);
     }
+
 
     @Override
     protected void onCleared() {

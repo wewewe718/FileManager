@@ -11,6 +11,25 @@
     <string name="storage_item_storage_space_format_string">%1$.2f / %2$.2f GB</string>
 
     <string name="empty_directory">Empty directory</string>
+    <string name="unable_to_open_file">Unable to open file</string>
+
+    <string name="search">Search</string>
+    <string name="sort">Sort</string>
+
+    <string name="sort_type_dialog_title">Sort by:</string>
+    <string name="sort_type_dialog_positive_button">OK</string>
+    <string-array name="sort_types">
+        <item>Name</item>
+        <item>Date</item>
+        <item>Type</item>
+        <item>Size</item>
+    </string-array>
+
+    <string name="cut">Cut</string>
+    <string name="copy">Copy</string>
+    <string name="delete">Delete</string>
+    <string name="info">Info</string>
+    <string name="rename">Rename</string>
 
     <string name="file_size_in_bytes">%.2f B</string>
     <string name="file_size_in_kb">%.2f KB</string>

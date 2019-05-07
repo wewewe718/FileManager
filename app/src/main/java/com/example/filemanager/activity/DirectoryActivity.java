@@ -4,30 +4,36 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.StringRes;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
 import com.example.filemanager.R;
 import com.example.filemanager.adapter.DirectoryItemsAdapter;
 import com.example.filemanager.databinding.ActivityDirectoryBinding;
+import com.example.filemanager.fragment.SortTypeDialogFragment;
 import com.example.filemanager.model.DirectoryItem;
+import com.example.filemanager.model.DirectoryItemType;
 import com.example.filemanager.viewmodel.DirectoryViewModel;
 
 import java.util.List;
 
 import io.reactivex.disposables.CompositeDisposable;
 
-public class DirectoryActivity extends AppCompatActivity {
+public class DirectoryActivity extends AppCompatActivity implements DirectoryItemsAdapter.Listener {
     private static final String DIRECTORY_INTENT_KEY = "DIRECTORY_INTENT_KEY";
 
     private CompositeDisposable viewModelDisposable = new CompositeDisposable();
-    private DirectoryItemsAdapter adapter = new DirectoryItemsAdapter(this::handleDirectoryItemClicked);
+    private DirectoryItemsAdapter adapter = new DirectoryItemsAdapter(this);
     private DirectoryViewModel viewModel;
     private ActivityDirectoryBinding binding;
 
@@ -45,21 +51,10 @@ public class DirectoryActivity extends AppCompatActivity {
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_directory);
 
-        String directory = getIntent().getStringExtra(DIRECTORY_INTENT_KEY);
-
-        initActionBar(directory);
+        initActionBar();
         initDirectoryItemsRecyclerView();
 
-        createViewModel(directory);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == android.R.id.home) {
-            finish();
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
+        createViewModel();
     }
 
     @Override
@@ -74,8 +69,47 @@ public class DirectoryActivity extends AppCompatActivity {
         unsubscribeFromViewModel();
     }
 
+    @Override
+    public void onBackPressed() {
+        viewModel.goToParentDirectory();
+    }
 
-    private void initActionBar(@NonNull String directory) {
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_directory_activity, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home: {
+                onBackPressed();
+                break;
+            }
+            case R.id.item_search: {
+                break;
+            }
+            case R.id.item_sort: {
+                showSortTypeDialog();
+                break;
+            }
+        }
+        return true;
+    }
+
+
+    @Override
+    public void onDirectoryItemClicked(@NonNull DirectoryItem item) {
+        if (item.getType().equals(DirectoryItemType.DIRECTORY)) {
+            viewModel.goToDirectory(item.getFilePath());
+        } else {
+            openFile(item);
+        }
+    }
+
+
+    private void initActionBar() {
         ActionBar actionBar = getSupportActionBar();
         if (actionBar == null) {
             return;
@@ -84,7 +118,6 @@ public class DirectoryActivity extends AppCompatActivity {
         actionBar.setHomeButtonEnabled(true);
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setDisplayShowHomeEnabled(true);
-        actionBar.setTitle(directory);
     }
 
     private void initDirectoryItemsRecyclerView() {
@@ -93,7 +126,8 @@ public class DirectoryActivity extends AppCompatActivity {
     }
 
 
-    private void createViewModel(@NonNull String directory) {
+    private void createViewModel() {
+        String directory = getIntent().getStringExtra(DIRECTORY_INTENT_KEY);
         viewModel = ViewModelProviders
                 .of(this, new DirectoryViewModel.Factory(directory))
                 .get(DirectoryViewModel.class);
@@ -102,7 +136,9 @@ public class DirectoryActivity extends AppCompatActivity {
     private void subscribeToViewModel() {
         viewModelDisposable.addAll(
             viewModel.isLoading.subscribe(this::showIsLoading),
-            viewModel.directoryContent.subscribe(this::showDirectoryContent)
+            viewModel.currentDirectory.subscribe(this::showCurrentDirectory),
+            viewModel.directoryContent.subscribe(this::showDirectoryContent),
+            viewModel.closeScreen.subscribe(f -> closeScreen())
         );
     }
 
@@ -114,6 +150,13 @@ public class DirectoryActivity extends AppCompatActivity {
     private void showIsLoading(boolean isLoading) {
         binding.directoryContentRecyclerView.setVisibility(isLoading ? View.GONE : View.VISIBLE);
         binding.directoryContentLoadingProgressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
+    }
+
+    private void showCurrentDirectory(@NonNull String currentDirectory) {
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setTitle(currentDirectory);
+        }
     }
 
     private void showDirectoryContent(@NonNull List<DirectoryItem> directoryContent) {
@@ -128,8 +171,24 @@ public class DirectoryActivity extends AppCompatActivity {
         binding.textViewEmptyDirectory.setVisibility(View.VISIBLE);
     }
 
+    private void openFile(@NonNull DirectoryItem item) {
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(item.getFilePath()));
+        if (intent.resolveActivity(getPackageManager()) == null) {
+            showToast(R.string.unable_to_open_file);
+        } else {
+            startActivity(intent);
+        }
+    }
 
-    private void handleDirectoryItemClicked(@NonNull Object item) {
+    private void closeScreen() {
+        finish();
+    }
 
+    private void showToast(@StringRes int messageId) {
+        Toast.makeText(this, messageId, Toast.LENGTH_LONG).show();
+    }
+
+    private void showSortTypeDialog() {
+        new SortTypeDialogFragment().show(getSupportFragmentManager(), "");
     }
 }
