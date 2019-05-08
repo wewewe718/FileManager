@@ -1,13 +1,18 @@
 package com.example.filemanager.adapter;
 
+import android.annotation.SuppressLint;
+import android.content.Context;
 import android.databinding.DataBindingUtil;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
+import android.support.v7.view.menu.MenuBuilder;
+import android.support.v7.view.menu.MenuPopupHelper;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.util.Pair;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -77,7 +82,7 @@ public class DirectoryItemsAdapter extends RecyclerView.Adapter<DirectoryItemsAd
 
         private void bind(@NonNull DirectoryItem item) {
             binding.getRoot().setOnClickListener(v -> listener.onDirectoryItemClicked(item));
-            binding.imageViewMore.setOnClickListener(this::showPopupMenu);
+            binding.imageViewMore.setOnClickListener(v -> showPopupMenu(v, item));
 
             binding.textViewName.setText(item.getName());
             showDirectoryItemTypeImage(item);
@@ -134,11 +139,22 @@ public class DirectoryItemsAdapter extends RecyclerView.Adapter<DirectoryItemsAd
             return -1;
         }
 
-        private void showPopupMenu(@NonNull View view) {
-            PopupMenu popup = new PopupMenu(itemView.getContext(), view);
+        @SuppressLint("RestrictedApi")
+        private void showPopupMenu(@NonNull View view, @NonNull DirectoryItem item) {
+            Context context = itemView.getContext();
+
+            PopupMenu popup = new PopupMenu(context, view);
             MenuInflater inflater = popup.getMenuInflater();
-            inflater.inflate(R.menu.menu_directory_item, popup.getMenu());
-            popup.show();
+            Menu popupMenu = popup.getMenu();
+            inflater.inflate(R.menu.menu_directory_item, popupMenu);
+
+            if (item.getType().equals(DirectoryItemType.DIRECTORY)) {
+                popupMenu.removeItem(R.id.item_share);
+            }
+
+            MenuPopupHelper menuHelper = new MenuPopupHelper(context, (MenuBuilder) popupMenu, view);
+            menuHelper.setForceShowIcon(true);
+            menuHelper.show();
         }
     }
 }

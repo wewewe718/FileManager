@@ -30,6 +30,7 @@
     <string name="delete">Delete</string>
     <string name="info">Info</string>
     <string name="rename">Rename</string>
+    <string name="share">Share</string>
 
     <string name="file_size_in_bytes">%.2f B</string>
     <string name="file_size_in_kb">%.2f KB</string>

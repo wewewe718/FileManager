@@ -1,25 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    >
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/item_cut"
         android:title="@string/cut"
+        android:icon="@drawable/ic_cut"
         />
     <item
         android:id="@+id/item_copy"
         android:title="@string/copy"
+        android:icon="@drawable/ic_copy"
         />
     <item
         android:id="@+id/item_rename"
         android:title="@string/rename"
+        android:icon="@drawable/ic_rename"
         />
     <item
         android:id="@+id/item_delete"
         android:title="@string/delete"
+        android:icon="@drawable/ic_delete"
         />
     <item
         android:id="@+id/item_info"
         android:title="@string/info"
+        android:icon="@drawable/ic_info"
+        />
+    <item
+        android:id="@+id/item_share"
+        android:title="@string/share"
+        android:icon="@drawable/ic_share"
         />
 </menu>
