@@ -4,13 +4,12 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.databinding.DataBindingUtil;
 import android.support.annotation.DrawableRes;
+import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
-import android.support.annotation.StringRes;
 import android.support.v7.view.menu.MenuBuilder;
 import android.support.v7.view.menu.MenuPopupHelper;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
-import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -21,21 +20,19 @@ import com.example.filemanager.R;
 import com.example.filemanager.databinding.ItemDirectoryItemBinding;
 import com.example.filemanager.model.DirectoryItem;
 import com.example.filemanager.model.DirectoryItemType;
-import com.example.filemanager.util.FileSizeConverter;
+import com.example.filemanager.util.DateFormatUtil;
+import com.example.filemanager.util.FileSizeFormatUtil;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 
 public class DirectoryItemsAdapter extends RecyclerView.Adapter<DirectoryItemsAdapter.ViewHolder> {
 
     public interface Listener {
         void onDirectoryItemClicked(@NonNull DirectoryItem item);
+        void onDirectoryItemInfoClicked(@NonNull DirectoryItem item);
     }
 
-    private static final DateFormat DATE_FORMATTER = new SimpleDateFormat( "dd-MM-yyyy", Locale.ENGLISH);
 
     private List<DirectoryItem> data = Collections.emptyList();
     private Listener listener;
@@ -95,7 +92,7 @@ public class DirectoryItemsAdapter extends RecyclerView.Adapter<DirectoryItemsAd
                 return;
             }
 
-            String dateText = DATE_FORMATTER.format(item.getLastModificationDate());
+            String dateText = DateFormatUtil.formatDate(item.getLastModificationDate());
             binding.textViewProperty.setText(dateText);
         }
 
@@ -104,9 +101,7 @@ public class DirectoryItemsAdapter extends RecyclerView.Adapter<DirectoryItemsAd
                 return;
             }
 
-            Pair<FileSizeConverter.FileSizeUnit, Double> fileSizeConverterResult = FileSizeConverter.convertFileSize(item.getFileSizeInBytes());
-            int formatStringId = mapFileSizeUnitToFormatString(fileSizeConverterResult.first);
-            String formattedFileSize = binding.getRoot().getContext().getString(formatStringId, fileSizeConverterResult.second);
+            String formattedFileSize = FileSizeFormatUtil.formatFileSize(binding.getRoot().getContext(), item.getFileSizeInBytes());
             binding.textViewProperty.setText(formattedFileSize);
         }
 
@@ -118,23 +113,18 @@ public class DirectoryItemsAdapter extends RecyclerView.Adapter<DirectoryItemsAd
         @DrawableRes
         private int mapDirectoryTypeToDrawable(@NonNull DirectoryItemType itemType) {
             switch (itemType) {
-                case DIRECTORY: return R.drawable.ic_directory;
-                case IMAGE: return R.drawable.ic_image;
-                case AUDIO: return R.drawable.ic_audio;
-                case VIDEO: return R.drawable.ic_video;
-                case TEXT: return R.drawable.ic_text_file;
-                case OTHER: return R.drawable.ic_text_file;
-            }
-            return -1;
-        }
-
-        @StringRes
-        private int mapFileSizeUnitToFormatString(FileSizeConverter.FileSizeUnit fileSizeUnit) {
-            switch (fileSizeUnit) {
-                case BYTE: return R.string.file_size_in_bytes;
-                case KILOBYTE: return R.string.file_size_in_kb;
-                case MEGABYTE: return R.string.file_size_in_mb;
-                case GIGABYTE: return R.string.file_size_in_gb;
+                case DIRECTORY:
+                    return R.drawable.ic_directory;
+                case IMAGE:
+                    return R.drawable.ic_image;
+                case AUDIO:
+                    return R.drawable.ic_audio;
+                case VIDEO:
+                    return R.drawable.ic_video;
+                case TEXT:
+                    return R.drawable.ic_document;
+                case OTHER:
+                    return R.drawable.ic_other_file;
             }
             return -1;
         }
@@ -148,6 +138,11 @@ public class DirectoryItemsAdapter extends RecyclerView.Adapter<DirectoryItemsAd
             Menu popupMenu = popup.getMenu();
             inflater.inflate(R.menu.menu_directory_item, popupMenu);
 
+            popup.setOnMenuItemClickListener(menuItem -> {
+                handlePopupMenuItemClicked(menuItem.getItemId(), item);
+                return true;
+            });
+
             if (item.getType().equals(DirectoryItemType.DIRECTORY)) {
                 popupMenu.removeItem(R.id.item_share);
             }
@@ -155,6 +150,12 @@ public class DirectoryItemsAdapter extends RecyclerView.Adapter<DirectoryItemsAd
             MenuPopupHelper menuHelper = new MenuPopupHelper(context, (MenuBuilder) popupMenu, view);
             menuHelper.setForceShowIcon(true);
             menuHelper.show();
+        }
+
+        private void handlePopupMenuItemClicked(@IdRes int itemId, @NonNull DirectoryItem item) {
+            if (itemId == R.id.item_info) {
+                listener.onDirectoryItemInfoClicked(item);
+            }
         }
     }
 }

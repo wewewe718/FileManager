@@ -20,6 +20,7 @@ import android.widget.Toast;
 import com.example.filemanager.R;
 import com.example.filemanager.adapter.DirectoryItemsAdapter;
 import com.example.filemanager.databinding.ActivityDirectoryBinding;
+import com.example.filemanager.fragment.DirectoryItemInfoDialogFragment;
 import com.example.filemanager.fragment.SortTypeDialogFragment;
 import com.example.filemanager.model.DirectoryItem;
 import com.example.filemanager.model.DirectoryItemType;
@@ -108,6 +109,11 @@ public class DirectoryActivity extends AppCompatActivity implements DirectoryIte
         }
     }
 
+    @Override
+    public void onDirectoryItemInfoClicked(@NonNull DirectoryItem item) {
+        showDirectoryItemInfoDialog(item);
+    }
+
 
     private void initActionBar() {
         ActionBar actionBar = getSupportActionBar();
@@ -190,5 +196,9 @@ public class DirectoryActivity extends AppCompatActivity implements DirectoryIte
 
     private void showSortTypeDialog() {
         new SortTypeDialogFragment().show(getSupportFragmentManager(), "");
+    }
+
+    private void showDirectoryItemInfoDialog(@NonNull DirectoryItem item) {
+        DirectoryItemInfoDialogFragment.newInstance(item).show(getSupportFragmentManager(), "");
     }
 }

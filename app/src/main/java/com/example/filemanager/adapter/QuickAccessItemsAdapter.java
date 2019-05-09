@@ -43,7 +43,7 @@ public class QuickAccessItemsAdapter extends BaseAdapter {
             new QuickAccessItemViewModel(R.drawable.ic_video, R.string.quick_access_item_video),
 
             // Documents item
-            new QuickAccessItemViewModel(R.drawable.ic_documents, R.string.quick_access_item_documents),
+            new QuickAccessItemViewModel(R.drawable.ic_document, R.string.quick_access_item_documents),
 
             // Apps item
             new QuickAccessItemViewModel(R.drawable.ic_app, R.string.quick_access_item_apps),

@@ -2,9 +2,10 @@ package com.example.filemanager.model;
 
 import android.support.annotation.NonNull;
 
+import java.io.Serializable;
 import java.util.Date;
 
-public class DirectoryItem {
+public class DirectoryItem implements Serializable {
     private DirectoryItemType type;
     private String name;
     private String filePath;
