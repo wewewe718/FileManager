@@ -9,14 +9,18 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 
+import com.example.App;
 import com.example.filemanager.R;
+import com.example.filemanager.model.SortType;
+import com.example.filemanager.repository.settings.SettingsRepository;
 
 public class SortTypeDialogFragment extends DialogFragment {
-    private static final String SORT_TYPE_SHARED_PREFERENCES_KEY = "SORT_TYPE_SHARED_PREFERENCES_KEY";
+    private SettingsRepository settingsRepository;
 
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
+        injectSettingsRepository();
         String[] choices = getActivity().getResources().getStringArray(R.array.sort_types);
         return new AlertDialog.Builder(getActivity())
                 .setTitle(R.string.sort_type_dialog_title)
@@ -27,20 +31,21 @@ public class SortTypeDialogFragment extends DialogFragment {
                 .create();
     }
 
+    private void injectSettingsRepository() {
+        App app = (App) getActivity().getApplication();
+        settingsRepository = app.getSettingsRepository();
+    }
+
     private void handlePositiveButtonClicked(@NonNull DialogInterface dialog) {
         int selectedPosition = ((AlertDialog) dialog).getListView().getCheckedItemPosition();
         saveSortType(selectedPosition);
     }
 
     private int getSortType() {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-        return sharedPreferences.getInt(SORT_TYPE_SHARED_PREFERENCES_KEY, 0);
+        return settingsRepository.getSortType().toInt();
     }
 
     private void saveSortType(int sortType) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-        sharedPreferences.edit()
-                .putInt(SORT_TYPE_SHARED_PREFERENCES_KEY, sortType)
-                .apply();
+        settingsRepository.setSortType(SortType.fromInt(sortType));
     }
 }

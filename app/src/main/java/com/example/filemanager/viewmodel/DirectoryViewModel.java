@@ -5,8 +5,11 @@ import android.arch.lifecycle.ViewModelProvider;
 import android.support.annotation.NonNull;
 
 import com.example.filemanager.model.DirectoryItem;
+import com.example.filemanager.model.SortType;
 import com.example.filemanager.repository.directory.DirectoryRepository;
 import com.example.filemanager.repository.directory.MockDirectoryRepository;
+import com.example.filemanager.repository.settings.SettingsRepository;
+import com.example.filemanager.util.SortDirectoryItemsUtil;
 
 import java.util.EmptyStackException;
 import java.util.List;
@@ -20,8 +23,9 @@ import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.Subject;
 
 public class DirectoryViewModel extends ViewModel {
+    private DirectoryRepository directoryRepository;
+    private SettingsRepository settingsRepository;
     private CompositeDisposable disposable = new CompositeDisposable();
-    private DirectoryRepository directoryRepository = new MockDirectoryRepository();
 
     private Stack<String> directories = new Stack<>();
 
@@ -32,7 +36,12 @@ public class DirectoryViewModel extends ViewModel {
     public Subject<Boolean> closeScreen = PublishSubject.create();
 
 
-    public DirectoryViewModel(@NonNull String directory) {
+    public DirectoryViewModel(@NonNull String directory, @NonNull DirectoryRepository directoryRepository, @NonNull SettingsRepository settingsRepository) {
+        this.directoryRepository = directoryRepository;
+        this.settingsRepository = settingsRepository;
+
+        settingsRepository.setListener(newSortType -> refreshCurrentDirectory());
+
         goToDirectory(directory);
     }
 
@@ -62,11 +71,17 @@ public class DirectoryViewModel extends ViewModel {
     }
 
 
+    private void refreshCurrentDirectory() {
+        String currentDirectory = directories.peek();
+        loadDirectoryContent(currentDirectory);
+    }
+
     private void loadDirectoryContent(@NonNull String directory) {
         isLoading.onNext(true);
 
         Disposable subscription = directoryRepository
                 .getDirectoryContent(directory)
+                .map(this::sortDirectoryItems)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         result -> {
@@ -82,25 +97,36 @@ public class DirectoryViewModel extends ViewModel {
         disposable.add(subscription);
     }
 
+    @NonNull
+    private List<DirectoryItem> sortDirectoryItems(@NonNull List<DirectoryItem> items) {
+        SortType sortType = settingsRepository.getSortType();
+        return SortDirectoryItemsUtil.sort(items, sortType);
+    }
+
 
     @Override
     protected void onCleared() {
         super.onCleared();
+        settingsRepository.removeListener();
         disposable.dispose();
     }
 
 
     public static class Factory implements ViewModelProvider.Factory {
         private String directory;
+        private DirectoryRepository directoryRepository;
+        private SettingsRepository settingsRepository;
 
-        public Factory(@NonNull String directory) {
+        public Factory(@NonNull String directory, @NonNull DirectoryRepository directoryRepository, @NonNull SettingsRepository settingsRepository) {
             this.directory = directory;
+            this.directoryRepository = directoryRepository;
+            this.settingsRepository = settingsRepository;
         }
 
         @NonNull
         @Override
         public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-            return (T) new DirectoryViewModel(directory);
+            return (T) new DirectoryViewModel(directory, directoryRepository, settingsRepository);
         }
     }
 }

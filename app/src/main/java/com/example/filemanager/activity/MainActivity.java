@@ -1,5 +1,6 @@
 package com.example.filemanager.activity;
 
+import android.arch.lifecycle.ViewModelProvider;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.res.Configuration;
 import android.databinding.DataBindingUtil;
@@ -10,11 +11,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.view.View;
 
+import com.example.App;
 import com.example.filemanager.R;
 import com.example.filemanager.adapter.QuickAccessItemsAdapter;
 import com.example.filemanager.adapter.StorageItemsAdapter;
 import com.example.filemanager.databinding.ActivityMainBinding;
 import com.example.filemanager.model.StorageModel;
+import com.example.filemanager.repository.storage.StorageListRepository;
 import com.example.filemanager.viewmodel.StorageListViewModel;
 
 import java.util.List;
@@ -73,7 +76,13 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void createViewModel() {
-        viewModel = ViewModelProviders.of(this).get(StorageListViewModel.class);
+        App app = (App) getApplication();
+        StorageListRepository storageListRepository = app.getStorageListRepository();
+        ViewModelProvider.Factory viewModelFactory = new StorageListViewModel.Factory(storageListRepository);
+
+        viewModel = ViewModelProviders
+                .of(this, viewModelFactory)
+                .get(StorageListViewModel.class);
     }
 
     private void subscribeToViewModel() {

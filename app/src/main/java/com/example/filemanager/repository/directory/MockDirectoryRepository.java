@@ -19,7 +19,7 @@ public class MockDirectoryRepository implements DirectoryRepository {
     @Override
     public Single<List<DirectoryItem>> getDirectoryContent(@NonNull String directory) {
         return Single.just(createMockDirectoryItemList(directory))
-                .delay(500, TimeUnit.MILLISECONDS)
+                .delay(1500, TimeUnit.MILLISECONDS)
                 .subscribeOn(Schedulers.io());
     }
 

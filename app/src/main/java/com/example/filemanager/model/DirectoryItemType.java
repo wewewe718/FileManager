@@ -6,5 +6,9 @@ public enum  DirectoryItemType {
     AUDIO,
     VIDEO,
     TEXT,
-    OTHER,
+    OTHER;
+
+    public int toInt() {
+        return ordinal();
+    }
 }

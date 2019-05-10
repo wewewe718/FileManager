@@ -1,5 +1,6 @@
 package com.example.filemanager.activity;
 
+import android.arch.lifecycle.ViewModelProvider;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
@@ -17,6 +18,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import com.example.App;
 import com.example.filemanager.R;
 import com.example.filemanager.adapter.DirectoryItemsAdapter;
 import com.example.filemanager.databinding.ActivityDirectoryBinding;
@@ -24,6 +26,8 @@ import com.example.filemanager.fragment.DirectoryItemInfoDialogFragment;
 import com.example.filemanager.fragment.SortTypeDialogFragment;
 import com.example.filemanager.model.DirectoryItem;
 import com.example.filemanager.model.DirectoryItemType;
+import com.example.filemanager.repository.directory.DirectoryRepository;
+import com.example.filemanager.repository.settings.SettingsRepository;
 import com.example.filemanager.viewmodel.DirectoryViewModel;
 
 import java.util.List;
@@ -134,8 +138,19 @@ public class DirectoryActivity extends AppCompatActivity implements DirectoryIte
 
     private void createViewModel() {
         String directory = getIntent().getStringExtra(DIRECTORY_INTENT_KEY);
+
+        App app = (App) getApplication();
+        DirectoryRepository directoryRepository = app.getDirectoryRepository();
+        SettingsRepository settingsRepository = app.getSettingsRepository();
+
+        ViewModelProvider.Factory viewModelFactory = new DirectoryViewModel.Factory(
+                directory,
+                directoryRepository,
+                settingsRepository
+        );
+
         viewModel = ViewModelProviders
-                .of(this, new DirectoryViewModel.Factory(directory))
+                .of(this, viewModelFactory)
                 .get(DirectoryViewModel.class);
     }
 
@@ -195,10 +210,12 @@ public class DirectoryActivity extends AppCompatActivity implements DirectoryIte
     }
 
     private void showSortTypeDialog() {
-        new SortTypeDialogFragment().show(getSupportFragmentManager(), "");
+        SortTypeDialogFragment dialog = new SortTypeDialogFragment();
+        dialog.show(getSupportFragmentManager(), "SortTypeDialogFragment");
     }
 
     private void showDirectoryItemInfoDialog(@NonNull DirectoryItem item) {
-        DirectoryItemInfoDialogFragment.newInstance(item).show(getSupportFragmentManager(), "");
+        DirectoryItemInfoDialogFragment dialog = DirectoryItemInfoDialogFragment.newInstance(item);
+        dialog.show(getSupportFragmentManager(), "DirectoryItemInfoDialogFragment");
     }
 }
