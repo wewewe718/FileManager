@@ -107,8 +107,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private void showQuickAccessItemDirectoryActivity() {
-        DirectoryActivity.start(this, "");
+    private void showQuickAccessItemDirectoryActivity(@NonNull String directoryPath) {
+        DirectoryActivity.start(this, directoryPath);
     }
 
     private void showStorageDirectoryActivity(@NonNull StorageModel storageModel) {

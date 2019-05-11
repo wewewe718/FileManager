@@ -1,4 +1,4 @@
-package com.example.filemanager.fragment;
+package com.example.filemanager.dialog;
 
 import android.app.Dialog;
 import android.databinding.DataBindingUtil;

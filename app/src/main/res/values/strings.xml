@@ -15,6 +15,12 @@
 
     <string name="search">Search</string>
     <string name="sort">Sort</string>
+    <string name="cut">Cut</string>
+    <string name="copy">Copy</string>
+    <string name="delete">Delete</string>
+    <string name="info">Info</string>
+    <string name="rename">Rename</string>
+    <string name="share">Share</string>
 
     <string name="sort_type_dialog_title">Sort by:</string>
     <string name="sort_type_dialog_positive_button">OK</string>
@@ -25,19 +31,17 @@
         <item>Size</item>
     </string-array>
 
-    <string name="cut">Cut</string>
-    <string name="copy">Copy</string>
-    <string name="delete">Delete</string>
-    <string name="info">Info</string>
-    <string name="rename">Rename</string>
-    <string name="share">Share</string>
-
     <string name="directory_item_info_dialog_title">Info</string>
     <string name="directory_item_info_positive_button">Close</string>
     <string name="name">Name</string>
     <string name="full_path">Full path</string>
     <string name="size">Size</string>
     <string name="last_modification_date">Last modification date</string>
+
+    <string name="delete_directory_item_dialog_title">Delete</string>
+    <string name="delete_directory_item_dialog_message">Are you sure want to delete %s?</string>
+    <string name="delete_directory_item_dialog_positive_button">OK</string>
+    <string name="delete_directory_item_dialog_negative_button">Cancel</string>
 
     <string name="file_size_in_bytes">%.2f B</string>
     <string name="file_size_in_kb">%.2f KB</string>

@@ -22,8 +22,9 @@ import com.example.App;
 import com.example.filemanager.R;
 import com.example.filemanager.adapter.DirectoryItemsAdapter;
 import com.example.filemanager.databinding.ActivityDirectoryBinding;
-import com.example.filemanager.fragment.DirectoryItemInfoDialogFragment;
-import com.example.filemanager.fragment.SortTypeDialogFragment;
+import com.example.filemanager.dialog.DeleteDirectoryItemDialogFragment;
+import com.example.filemanager.dialog.DirectoryItemInfoDialogFragment;
+import com.example.filemanager.dialog.SortTypeDialogFragment;
 import com.example.filemanager.model.DirectoryItem;
 import com.example.filemanager.model.DirectoryItemType;
 import com.example.filemanager.repository.directory.DirectoryRepository;
@@ -34,7 +35,7 @@ import java.util.List;
 
 import io.reactivex.disposables.CompositeDisposable;
 
-public class DirectoryActivity extends AppCompatActivity implements DirectoryItemsAdapter.Listener {
+public class DirectoryActivity extends AppCompatActivity implements DirectoryItemsAdapter.Listener, DeleteDirectoryItemDialogFragment.Listener {
     private static final String DIRECTORY_INTENT_KEY = "DIRECTORY_INTENT_KEY";
 
     private CompositeDisposable viewModelDisposable = new CompositeDisposable();
@@ -118,6 +119,16 @@ public class DirectoryActivity extends AppCompatActivity implements DirectoryIte
         showDirectoryItemInfoDialog(item);
     }
 
+    @Override
+    public void onDirectoryItemDeleteClicked(@NonNull DirectoryItem item) {
+        showDeleteDirectoryItemDialog(item);
+    }
+
+    @Override
+    public void onDeleteDirectoryItem(@NonNull DirectoryItem item) {
+        viewModel.deleteDirectoryItem(item);
+    }
+
 
     private void initActionBar() {
         ActionBar actionBar = getSupportActionBar();
@@ -156,10 +167,10 @@ public class DirectoryActivity extends AppCompatActivity implements DirectoryIte
 
     private void subscribeToViewModel() {
         viewModelDisposable.addAll(
-            viewModel.isLoading.subscribe(this::showIsLoading),
-            viewModel.currentDirectory.subscribe(this::showCurrentDirectory),
-            viewModel.directoryContent.subscribe(this::showDirectoryContent),
-            viewModel.closeScreen.subscribe(f -> closeScreen())
+                viewModel.isLoading.subscribe(this::showIsLoading),
+                viewModel.currentDirectory.subscribe(this::showCurrentDirectory),
+                viewModel.directoryContent.subscribe(this::showDirectoryContent),
+                viewModel.closeScreen.subscribe(f -> closeScreen())
         );
     }
 
@@ -217,5 +228,10 @@ public class DirectoryActivity extends AppCompatActivity implements DirectoryIte
     private void showDirectoryItemInfoDialog(@NonNull DirectoryItem item) {
         DirectoryItemInfoDialogFragment dialog = DirectoryItemInfoDialogFragment.newInstance(item);
         dialog.show(getSupportFragmentManager(), "DirectoryItemInfoDialogFragment");
+    }
+
+    private void showDeleteDirectoryItemDialog(@NonNull DirectoryItem item) {
+        DeleteDirectoryItemDialogFragment dialog = DeleteDirectoryItemDialogFragment.newInstance(item);
+        dialog.show(getSupportFragmentManager(), "DeleteDirectoryItemDialogFragment");
     }
 }

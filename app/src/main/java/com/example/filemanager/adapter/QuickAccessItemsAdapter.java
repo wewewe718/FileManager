@@ -17,45 +17,45 @@ public class QuickAccessItemsAdapter extends BaseAdapter {
     private static class QuickAccessItemViewModel {
         public int iconId;
         public int textId;
+        public String directoryPath;
 
-        public QuickAccessItemViewModel(int iconId, int textId) {
+        public QuickAccessItemViewModel(int iconId, int textId, @NonNull String directoryPath) {
             this.iconId = iconId;
             this.textId = textId;
+            this.directoryPath = directoryPath;
         }
     }
 
     public interface Listener {
-        void onItemClicked();
+        void onItemClicked(@NonNull String directoryPath);
     }
 
 
     private LayoutInflater layoutInflater;
-    private Resources resources;
     private Listener listener;
     private QuickAccessItemViewModel[] data = {
             // Images item
-            new QuickAccessItemViewModel(R.drawable.ic_image, R.string.quick_access_item_images),
+            new QuickAccessItemViewModel(R.drawable.ic_image, R.string.quick_access_item_images, "/test"),
 
             // Audio item
-            new QuickAccessItemViewModel(R.drawable.ic_audio, R.string.quick_access_item_audio),
+            new QuickAccessItemViewModel(R.drawable.ic_audio, R.string.quick_access_item_audio, "/test"),
 
             // Video item
-            new QuickAccessItemViewModel(R.drawable.ic_video, R.string.quick_access_item_video),
+            new QuickAccessItemViewModel(R.drawable.ic_video, R.string.quick_access_item_video, "/test"),
 
             // Documents item
-            new QuickAccessItemViewModel(R.drawable.ic_document, R.string.quick_access_item_documents),
+            new QuickAccessItemViewModel(R.drawable.ic_document, R.string.quick_access_item_documents, "/test"),
 
             // Apps item
-            new QuickAccessItemViewModel(R.drawable.ic_app, R.string.quick_access_item_apps),
+            new QuickAccessItemViewModel(R.drawable.ic_app, R.string.quick_access_item_apps, "/test"),
 
             // Downloads item
-            new QuickAccessItemViewModel(R.drawable.ic_downloads, R.string.quick_access_item_downloads)
+            new QuickAccessItemViewModel(R.drawable.ic_downloads, R.string.quick_access_item_downloads, "/test")
     };
 
 
     public QuickAccessItemsAdapter(@NonNull Context context, @NonNull Listener listener) {
         this.layoutInflater = LayoutInflater.from(context);
-        this.resources = context.getResources();
         this.listener = listener;
     }
 
@@ -90,6 +90,8 @@ public class QuickAccessItemsAdapter extends BaseAdapter {
         // Show quick access item name
         TextView textView = convertView.findViewById(R.id.quick_access_item_icon_text_view);
         textView.setText(model.textId);
+
+        convertView.setOnClickListener(v -> listener.onItemClicked(model.directoryPath));
 
         return convertView;
     }

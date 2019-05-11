@@ -70,6 +70,22 @@ public class DirectoryViewModel extends ViewModel {
         loadDirectoryContent(directory);
     }
 
+    public void deleteDirectoryItem(@NonNull DirectoryItem item) {
+        isLoading.onNext(true);
+
+        Disposable subscription = directoryRepository
+                .deleteDirectoryItem(item)
+                .subscribe(
+                        this::refreshCurrentDirectory,
+                        error -> {
+                            isLoading.onNext(false);
+                            error.printStackTrace();
+                        }
+                );
+
+        disposable.add(subscription);
+    }
+
 
     private void refreshCurrentDirectory() {
         String currentDirectory = directories.peek();

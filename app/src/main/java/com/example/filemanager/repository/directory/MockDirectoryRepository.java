@@ -10,6 +10,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import io.reactivex.Completable;
 import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
 
@@ -19,6 +20,14 @@ public class MockDirectoryRepository implements DirectoryRepository {
     @Override
     public Single<List<DirectoryItem>> getDirectoryContent(@NonNull String directory) {
         return Single.just(createMockDirectoryItemList(directory))
+                .delay(1500, TimeUnit.MILLISECONDS)
+                .subscribeOn(Schedulers.io());
+    }
+
+    @NonNull
+    @Override
+    public Completable deleteDirectoryItem(@NonNull DirectoryItem item) {
+        return Completable.complete()
                 .delay(1500, TimeUnit.MILLISECONDS)
                 .subscribeOn(Schedulers.io());
     }

@@ -31,6 +31,7 @@ public class DirectoryItemsAdapter extends RecyclerView.Adapter<DirectoryItemsAd
     public interface Listener {
         void onDirectoryItemClicked(@NonNull DirectoryItem item);
         void onDirectoryItemInfoClicked(@NonNull DirectoryItem item);
+        void onDirectoryItemDeleteClicked(@NonNull DirectoryItem item);
     }
 
 
@@ -153,8 +154,15 @@ public class DirectoryItemsAdapter extends RecyclerView.Adapter<DirectoryItemsAd
         }
 
         private void handlePopupMenuItemClicked(@IdRes int itemId, @NonNull DirectoryItem item) {
-            if (itemId == R.id.item_info) {
-                listener.onDirectoryItemInfoClicked(item);
+            switch (itemId) {
+                case R.id.item_info: {
+                    listener.onDirectoryItemInfoClicked(item);
+                    break;
+                }
+                case R.id.item_delete: {
+                    listener.onDirectoryItemDeleteClicked(item);
+                    break;
+                }
             }
         }
     }
