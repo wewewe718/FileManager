@@ -13,6 +13,7 @@ import android.support.annotation.StringRes;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.SearchView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -36,13 +37,18 @@ import java.util.List;
 
 import io.reactivex.disposables.CompositeDisposable;
 
-public class DirectoryActivity extends AppCompatActivity implements DirectoryItemsAdapter.Listener, DeleteDirectoryItemDialogFragment.Listener, RenameDirectoryItemDialogFragment.Listener {
+public class DirectoryActivity extends AppCompatActivity implements
+        DirectoryItemsAdapter.Listener, DeleteDirectoryItemDialogFragment.Listener, RenameDirectoryItemDialogFragment.Listener, SortTypeDialogFragment.Listener {
     private static final String DIRECTORY_INTENT_KEY = "DIRECTORY_INTENT_KEY";
+    private static final String SEARCH_VIEW_QUERY_KEY = "SEARCH_VIEW_QUERY_KEY";
 
     private CompositeDisposable viewModelDisposable = new CompositeDisposable();
     private DirectoryItemsAdapter adapter = new DirectoryItemsAdapter(this);
     private DirectoryViewModel viewModel;
     private ActivityDirectoryBinding binding;
+
+    private SearchView searchView;
+    private String searchQuery = "";
 
 
     public static void start(@NonNull Context context, @NonNull String directory) {
@@ -77,13 +83,38 @@ public class DirectoryActivity extends AppCompatActivity implements DirectoryIte
     }
 
     @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        String searchQuery = searchView.getQuery().toString();
+        outState.putString(SEARCH_VIEW_QUERY_KEY, searchQuery);
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(@Nullable Bundle savedInstanceState) {
+        if (savedInstanceState != null) {
+            searchQuery = savedInstanceState.getString(SEARCH_VIEW_QUERY_KEY, "");
+        }
+    }
+
+    @Override
     public void onBackPressed() {
+        // Close search view if opened
+        if (!searchView.isIconified()) {
+            searchView.setIconified(true);
+            return;
+        }
+
         viewModel.goToParentDirectory();
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_directory_activity, menu);
+
+        MenuItem searchItem = menu.findItem(R.id.item_search);
+        searchView = (SearchView) searchItem.getActionView();
+        initSearchView();
+
         return true;
     }
 
@@ -132,6 +163,11 @@ public class DirectoryActivity extends AppCompatActivity implements DirectoryIte
 
 
     @Override
+    public void onSortTypeChanged() {
+        viewModel.sortDirectoryContent();
+    }
+
+    @Override
     public void onRenameDirectoryItem(@NonNull String newName, @NonNull DirectoryItem item) {
         viewModel.renameDirectoryItem(newName, item);
     }
@@ -158,6 +194,23 @@ public class DirectoryActivity extends AppCompatActivity implements DirectoryIte
         binding.directoryContentRecyclerView.setAdapter(adapter);
     }
 
+    private void initSearchView() {
+        restoreSearchView();
+
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextChange(@NonNull String query) {
+                viewModel.search(query);
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextSubmit(@NonNull String query) {
+                return false;
+            }
+        });
+    }
+
 
     private void createViewModel() {
         String directory = getIntent().getStringExtra(DIRECTORY_INTENT_KEY);
@@ -181,6 +234,7 @@ public class DirectoryActivity extends AppCompatActivity implements DirectoryIte
         viewModelDisposable.addAll(
                 viewModel.isLoading.subscribe(this::showIsLoading),
                 viewModel.currentDirectory.subscribe(this::showCurrentDirectory),
+                viewModel.searchQuery.subscribe(this::showSearchQuery),
                 viewModel.directoryContent.subscribe(this::showDirectoryContent),
                 viewModel.closeScreen.subscribe(f -> closeScreen())
         );
@@ -204,15 +258,21 @@ public class DirectoryActivity extends AppCompatActivity implements DirectoryIte
     }
 
     private void showDirectoryContent(@NonNull List<DirectoryItem> directoryContent) {
-        if (directoryContent.isEmpty()) {
-            showDirectoryIsEmpty();
-        } else {
+        boolean isEmpty = directoryContent.isEmpty();
+        showDirectoryIsEmpty(isEmpty);
+
+        if (!isEmpty) {
             adapter.setData(directoryContent);
         }
     }
 
-    private void showDirectoryIsEmpty() {
-        binding.textViewEmptyDirectory.setVisibility(View.VISIBLE);
+    private void showDirectoryIsEmpty(boolean isEmpty) {
+        binding.textViewEmptyDirectory.setVisibility(isEmpty ? View.VISIBLE : View.GONE);
+        binding.directoryContentRecyclerView.setVisibility(isEmpty ? View.GONE : View.VISIBLE);
+    }
+
+    private void showSearchQuery(@NonNull String searchQuery) {
+        adapter.setSearchQuery(searchQuery);
     }
 
     private void openFile(@NonNull DirectoryItem item) {
@@ -230,6 +290,15 @@ public class DirectoryActivity extends AppCompatActivity implements DirectoryIte
 
     private void showToast(@StringRes int messageId) {
         Toast.makeText(this, messageId, Toast.LENGTH_LONG).show();
+    }
+
+    private void restoreSearchView() {
+        if (searchQuery.isEmpty()) {
+            return;
+        }
+
+        searchView.setIconified(false);
+        searchView.setQuery(searchQuery, false);
     }
 
     private void showSortTypeDialog() {

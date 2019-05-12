@@ -3,6 +3,7 @@ package com.example.filemanager.adapter;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.databinding.DataBindingUtil;
+import android.graphics.Color;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
@@ -10,6 +11,9 @@ import android.support.v7.view.menu.MenuBuilder;
 import android.support.v7.view.menu.MenuPopupHelper;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.style.BackgroundColorSpan;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -37,6 +41,7 @@ public class DirectoryItemsAdapter extends RecyclerView.Adapter<DirectoryItemsAd
 
 
     private List<DirectoryItem> data = Collections.emptyList();
+    private String searchQuery = "";
     private Listener listener;
 
 
@@ -44,6 +49,10 @@ public class DirectoryItemsAdapter extends RecyclerView.Adapter<DirectoryItemsAd
         this.listener = listener;
     }
 
+
+    public void setSearchQuery(@NonNull String searchQuery) {
+        this.searchQuery = searchQuery;
+    }
 
     public void setData(@NonNull List<DirectoryItem> data) {
         this.data = data;
@@ -83,10 +92,25 @@ public class DirectoryItemsAdapter extends RecyclerView.Adapter<DirectoryItemsAd
             binding.getRoot().setOnClickListener(v -> listener.onDirectoryItemClicked(item));
             binding.imageViewMore.setOnClickListener(v -> showPopupMenu(v, item));
 
-            binding.textViewName.setText(item.getName());
+            showDirectoryItemName(item);
             showDirectoryItemTypeImage(item);
             showDateIfNeeded(item);
             showFileSizeIfNeeded(item);
+        }
+
+        private void showDirectoryItemName(@NonNull DirectoryItem item) {
+            CharSequence name;
+            if (searchQuery.isEmpty()) {
+                name = item.getName();
+            } else {
+                name = highlightText(item.getName(), searchQuery);
+            }
+            binding.textViewName.setText(name);
+        }
+
+        private void showDirectoryItemTypeImage(@NonNull DirectoryItem item) {
+            int drawable = mapDirectoryTypeToDrawable(item.getType());
+            binding.imageViewItemType.setBackgroundResource(drawable);
         }
 
         private void showDateIfNeeded(@NonNull DirectoryItem item) {
@@ -105,11 +129,6 @@ public class DirectoryItemsAdapter extends RecyclerView.Adapter<DirectoryItemsAd
 
             String formattedFileSize = FileSizeFormatUtil.formatFileSize(binding.getRoot().getContext(), item.getFileSizeInBytes());
             binding.textViewProperty.setText(formattedFileSize);
-        }
-
-        private void showDirectoryItemTypeImage(@NonNull DirectoryItem item) {
-            int drawable = mapDirectoryTypeToDrawable(item.getType());
-            binding.imageViewItemType.setBackgroundResource(drawable);
         }
 
         @DrawableRes
@@ -169,6 +188,31 @@ public class DirectoryItemsAdapter extends RecyclerView.Adapter<DirectoryItemsAd
                     break;
                 }
             }
+        }
+
+        private SpannableString highlightText(@NonNull String text, @NonNull String searchText) {
+            SpannableString result = new SpannableString(text);
+
+            // Remove previous spans
+            BackgroundColorSpan[] backgroundSpans = result.getSpans(0, result.length(), BackgroundColorSpan.class);
+            for (BackgroundColorSpan span : backgroundSpans) {
+                result.removeSpan(span);
+            }
+
+            searchText = searchText.toLowerCase();
+            text = text.toLowerCase();
+
+            // Highlight all searchText occurrences
+            int indexOfKeyword = text.indexOf(searchText, 0);
+            while (indexOfKeyword >= 0) {
+                //Create a background color span on the keyword
+                result.setSpan(new BackgroundColorSpan(Color.YELLOW), indexOfKeyword, indexOfKeyword + searchText.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+                //Get the next index of the keyword
+                indexOfKeyword = text.indexOf(searchText, indexOfKeyword + searchText.length());
+            }
+
+            return result;
         }
     }
 }

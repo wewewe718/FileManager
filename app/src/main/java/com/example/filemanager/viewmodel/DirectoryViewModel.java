@@ -7,17 +7,19 @@ import android.support.annotation.NonNull;
 import com.example.filemanager.model.DirectoryItem;
 import com.example.filemanager.model.SortType;
 import com.example.filemanager.repository.directory.DirectoryRepository;
-import com.example.filemanager.repository.directory.MockDirectoryRepository;
 import com.example.filemanager.repository.settings.SettingsRepository;
+import com.example.filemanager.util.SearchDirectoryItemsUtil;
 import com.example.filemanager.util.SortDirectoryItemsUtil;
 
 import java.util.EmptyStackException;
 import java.util.List;
 import java.util.Stack;
 
+import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 import io.reactivex.subjects.BehaviorSubject;
 import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.Subject;
@@ -28,20 +30,18 @@ public class DirectoryViewModel extends ViewModel {
     private CompositeDisposable disposable = new CompositeDisposable();
 
     private Stack<String> directories = new Stack<>();
+    private List<DirectoryItem> cachedDirectoryContent;
 
     public Subject<Boolean> isLoading = BehaviorSubject.createDefault(true);
     public Subject<String> currentDirectory = BehaviorSubject.create();
+    public Subject<String> searchQuery = BehaviorSubject.create();
     public Subject<List<DirectoryItem>> directoryContent = BehaviorSubject.create();
-
     public Subject<Boolean> closeScreen = PublishSubject.create();
 
 
     public DirectoryViewModel(@NonNull String directory, @NonNull DirectoryRepository directoryRepository, @NonNull SettingsRepository settingsRepository) {
         this.directoryRepository = directoryRepository;
         this.settingsRepository = settingsRepository;
-
-        settingsRepository.setListener(newSortType -> refreshCurrentDirectory());
-
         goToDirectory(directory);
     }
 
@@ -68,6 +68,57 @@ public class DirectoryViewModel extends ViewModel {
         directories.push(directory);
         this.currentDirectory.onNext(directory);
         loadDirectoryContent(directory);
+    }
+
+    public void sortDirectoryContent() {
+        if (cachedDirectoryContent == null)  {
+            return;
+        }
+
+        isLoading.onNext(true);
+
+        Disposable subscription = Single.just(cachedDirectoryContent)
+                .map(this::sortDirectoryItems)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        result -> {
+                            isLoading.onNext(false);
+                            directoryContent.onNext(result);
+                        },
+                        error -> {
+                            isLoading.onNext(false);
+                            error.printStackTrace();
+                        }
+                );
+
+        disposable.add(subscription);
+    }
+
+    public void search(@NonNull String query) {
+        if (cachedDirectoryContent == null)  {
+            return;
+        }
+
+        isLoading.onNext(true);
+
+        Disposable subscription = Single.just(cachedDirectoryContent)
+                .map(items -> searchDirectoryItems(query, items))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        result -> {
+                            isLoading.onNext(false);
+                            searchQuery.onNext(query);
+                            directoryContent.onNext(result);
+                        },
+                        error -> {
+                            isLoading.onNext(false);
+                            error.printStackTrace();
+                        }
+                );
+
+        disposable.add(subscription);
     }
 
     public void renameDirectoryItem(@NonNull String newName, @NonNull DirectoryItem item) {
@@ -117,6 +168,7 @@ public class DirectoryViewModel extends ViewModel {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         result -> {
+                            cachedDirectoryContent = result;
                             isLoading.onNext(false);
                             directoryContent.onNext(result);
                         },
@@ -133,6 +185,11 @@ public class DirectoryViewModel extends ViewModel {
     private List<DirectoryItem> sortDirectoryItems(@NonNull List<DirectoryItem> items) {
         SortType sortType = settingsRepository.getSortType();
         return SortDirectoryItemsUtil.sort(items, sortType);
+    }
+
+    @NonNull
+    private List<DirectoryItem> searchDirectoryItems(@NonNull String query, @NonNull List<DirectoryItem> items) {
+        return SearchDirectoryItemsUtil.searchDirectoryItems(query, items);
     }
 
 
