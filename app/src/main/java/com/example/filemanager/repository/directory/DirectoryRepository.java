@@ -14,5 +14,8 @@ public interface DirectoryRepository {
     Single<List<DirectoryItem>> getDirectoryContent(@NonNull String directory);
 
     @NonNull
+    Completable renameDirectoryItem(@NonNull String newName, @NonNull DirectoryItem item);
+
+    @NonNull
     Completable deleteDirectoryItem(@NonNull DirectoryItem item);
 }

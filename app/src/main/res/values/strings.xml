@@ -43,6 +43,10 @@
     <string name="delete_directory_item_dialog_positive_button">OK</string>
     <string name="delete_directory_item_dialog_negative_button">Cancel</string>
 
+    <string name="rename_directory_item_dialog_title">Rename</string>
+    <string name="rename_directory_item_dialog_positive_button">Rename</string>
+    <string name="rename_directory_item_dialog_negative_button">Cancel</string>
+
     <string name="file_size_in_bytes">%.2f B</string>
     <string name="file_size_in_kb">%.2f KB</string>
     <string name="file_size_in_mb">%.2f MB</string>

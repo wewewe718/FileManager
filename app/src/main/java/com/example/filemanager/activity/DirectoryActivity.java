@@ -24,6 +24,7 @@ import com.example.filemanager.adapter.DirectoryItemsAdapter;
 import com.example.filemanager.databinding.ActivityDirectoryBinding;
 import com.example.filemanager.dialog.DeleteDirectoryItemDialogFragment;
 import com.example.filemanager.dialog.DirectoryItemInfoDialogFragment;
+import com.example.filemanager.dialog.RenameDirectoryItemDialogFragment;
 import com.example.filemanager.dialog.SortTypeDialogFragment;
 import com.example.filemanager.model.DirectoryItem;
 import com.example.filemanager.model.DirectoryItemType;
@@ -35,7 +36,7 @@ import java.util.List;
 
 import io.reactivex.disposables.CompositeDisposable;
 
-public class DirectoryActivity extends AppCompatActivity implements DirectoryItemsAdapter.Listener, DeleteDirectoryItemDialogFragment.Listener {
+public class DirectoryActivity extends AppCompatActivity implements DirectoryItemsAdapter.Listener, DeleteDirectoryItemDialogFragment.Listener, RenameDirectoryItemDialogFragment.Listener {
     private static final String DIRECTORY_INTENT_KEY = "DIRECTORY_INTENT_KEY";
 
     private CompositeDisposable viewModelDisposable = new CompositeDisposable();
@@ -120,8 +121,19 @@ public class DirectoryActivity extends AppCompatActivity implements DirectoryIte
     }
 
     @Override
+    public void onDirectoryItemRenameClicked(@NonNull DirectoryItem item) {
+        showRenameDirectoryItemDialog(item);
+    }
+
+    @Override
     public void onDirectoryItemDeleteClicked(@NonNull DirectoryItem item) {
         showDeleteDirectoryItemDialog(item);
+    }
+
+
+    @Override
+    public void onRenameDirectoryItem(@NonNull String newName, @NonNull DirectoryItem item) {
+        viewModel.renameDirectoryItem(newName, item);
     }
 
     @Override
@@ -225,13 +237,18 @@ public class DirectoryActivity extends AppCompatActivity implements DirectoryIte
         dialog.show(getSupportFragmentManager(), "SortTypeDialogFragment");
     }
 
-    private void showDirectoryItemInfoDialog(@NonNull DirectoryItem item) {
-        DirectoryItemInfoDialogFragment dialog = DirectoryItemInfoDialogFragment.newInstance(item);
-        dialog.show(getSupportFragmentManager(), "DirectoryItemInfoDialogFragment");
+    private void showRenameDirectoryItemDialog(@NonNull DirectoryItem item) {
+        RenameDirectoryItemDialogFragment dialog = RenameDirectoryItemDialogFragment.newInstance(item);
+        dialog.show(getSupportFragmentManager(), "RenameDirectoryItemDialogFragment");
     }
 
     private void showDeleteDirectoryItemDialog(@NonNull DirectoryItem item) {
         DeleteDirectoryItemDialogFragment dialog = DeleteDirectoryItemDialogFragment.newInstance(item);
         dialog.show(getSupportFragmentManager(), "DeleteDirectoryItemDialogFragment");
+    }
+
+    private void showDirectoryItemInfoDialog(@NonNull DirectoryItem item) {
+        DirectoryItemInfoDialogFragment dialog = DirectoryItemInfoDialogFragment.newInstance(item);
+        dialog.show(getSupportFragmentManager(), "DirectoryItemInfoDialogFragment");
     }
 }

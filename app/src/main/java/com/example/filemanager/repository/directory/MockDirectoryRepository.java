@@ -26,6 +26,14 @@ public class MockDirectoryRepository implements DirectoryRepository {
 
     @NonNull
     @Override
+    public Completable renameDirectoryItem(@NonNull String newName, @NonNull DirectoryItem item) {
+        return Completable.complete()
+                .delay(1500, TimeUnit.MILLISECONDS)
+                .subscribeOn(Schedulers.io());
+    }
+
+    @NonNull
+    @Override
     public Completable deleteDirectoryItem(@NonNull DirectoryItem item) {
         return Completable.complete()
                 .delay(1500, TimeUnit.MILLISECONDS)
