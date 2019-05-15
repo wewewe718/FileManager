@@ -1,5 +1,6 @@
 package com.example.filemanager.activity;
 
+import android.annotation.SuppressLint;
 import android.arch.lifecycle.ViewModelProvider;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
@@ -23,6 +24,7 @@ import com.example.App;
 import com.example.filemanager.R;
 import com.example.filemanager.adapter.DirectoryItemsAdapter;
 import com.example.filemanager.databinding.ActivityDirectoryBinding;
+import com.example.filemanager.dialog.CopyDialog;
 import com.example.filemanager.dialog.DeleteDirectoryItemDialogFragment;
 import com.example.filemanager.dialog.DirectoryItemInfoDialogFragment;
 import com.example.filemanager.dialog.RenameDirectoryItemDialogFragment;
@@ -42,10 +44,12 @@ public class DirectoryActivity extends AppCompatActivity implements
     private static final String DIRECTORY_INTENT_KEY = "DIRECTORY_INTENT_KEY";
     private static final String SEARCH_VIEW_QUERY_KEY = "SEARCH_VIEW_QUERY_KEY";
 
-    private CompositeDisposable viewModelDisposable = new CompositeDisposable();
     private DirectoryItemsAdapter adapter = new DirectoryItemsAdapter(this);
-    private DirectoryViewModel viewModel;
+    private CopyDialog copyDialog = new CopyDialog();
     private ActivityDirectoryBinding binding;
+
+    private CompositeDisposable viewModelDisposable = new CompositeDisposable();
+    private DirectoryViewModel viewModel;
 
     private SearchView searchView;
     private String searchQuery = "";
@@ -66,6 +70,7 @@ public class DirectoryActivity extends AppCompatActivity implements
 
         initActionBar();
         initDirectoryItemsRecyclerView();
+        initPasteButton();
 
         createViewModel();
     }
@@ -104,7 +109,7 @@ public class DirectoryActivity extends AppCompatActivity implements
             return;
         }
 
-        viewModel.goToParentDirectory();
+        viewModel.handleBackPressed();
     }
 
     @Override
@@ -147,8 +152,13 @@ public class DirectoryActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onDirectoryItemInfoClicked(@NonNull DirectoryItem item) {
-        showDirectoryItemInfoDialog(item);
+    public void onDirectoryItemCutClicked(@NonNull DirectoryItem item) {
+        viewModel.cut(item);
+    }
+
+    @Override
+    public void onDirectoryItemCopyClicked(@NonNull DirectoryItem item) {
+        viewModel.copy(item);
     }
 
     @Override
@@ -161,6 +171,16 @@ public class DirectoryActivity extends AppCompatActivity implements
         showDeleteDirectoryItemDialog(item);
     }
 
+    @Override
+    public void onDirectoryItemInfoClicked(@NonNull DirectoryItem item) {
+        showDirectoryItemInfoDialog(item);
+    }
+
+    @Override
+    public void onDirectoryItemShareClicked(@NonNull DirectoryItem item) {
+
+    }
+
 
     @Override
     public void onSortTypeChanged() {
@@ -169,12 +189,12 @@ public class DirectoryActivity extends AppCompatActivity implements
 
     @Override
     public void onRenameDirectoryItem(@NonNull String newName, @NonNull DirectoryItem item) {
-        viewModel.renameDirectoryItem(newName, item);
+        viewModel.rename(newName, item);
     }
 
     @Override
     public void onDeleteDirectoryItem(@NonNull DirectoryItem item) {
-        viewModel.deleteDirectoryItem(item);
+        viewModel.delete(item);
     }
 
 
@@ -211,6 +231,10 @@ public class DirectoryActivity extends AppCompatActivity implements
         });
     }
 
+    private void initPasteButton() {
+        binding.fabPaste.setOnClickListener(v -> viewModel.paste());
+    }
+
 
     private void createViewModel() {
         String directory = getIntent().getStringExtra(DIRECTORY_INTENT_KEY);
@@ -236,6 +260,8 @@ public class DirectoryActivity extends AppCompatActivity implements
                 viewModel.currentDirectory.subscribe(this::showCurrentDirectory),
                 viewModel.searchQuery.subscribe(this::showSearchQuery),
                 viewModel.directoryContent.subscribe(this::showDirectoryContent),
+                viewModel.isCopyModeEnabled.subscribe(this::showCopyModeEnabled),
+                viewModel.isCopyDialogVisible.subscribe(this::showOrHideCopyDialog),
                 viewModel.closeScreen.subscribe(f -> closeScreen())
         );
     }
@@ -275,6 +301,19 @@ public class DirectoryActivity extends AppCompatActivity implements
         adapter.setSearchQuery(searchQuery);
     }
 
+    @SuppressLint("RestrictedApi")
+    private void showCopyModeEnabled(boolean isCopyModeEnabled) {
+        int fabVisibility = isCopyModeEnabled ? View.VISIBLE : View.GONE;
+        int iconId = isCopyModeEnabled ? R.drawable.ic_clear : R.drawable.ic_arrow_back;
+
+        binding.fabPaste.setVisibility(fabVisibility);
+
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setHomeAsUpIndicator(iconId);
+        }
+    }
+
     private void openFile(@NonNull DirectoryItem item) {
         Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(item.getFilePath()));
         if (intent.resolveActivity(getPackageManager()) == null) {
@@ -304,6 +343,14 @@ public class DirectoryActivity extends AppCompatActivity implements
     private void showSortTypeDialog() {
         SortTypeDialogFragment dialog = new SortTypeDialogFragment();
         dialog.show(getSupportFragmentManager(), "SortTypeDialogFragment");
+    }
+
+    private void showOrHideCopyDialog(boolean show) {
+        if (show) {
+            copyDialog.show(this);
+        } else {
+            copyDialog.dismiss();
+        }
     }
 
     private void showRenameDirectoryItemDialog(@NonNull DirectoryItem item) {

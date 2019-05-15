@@ -11,10 +11,12 @@ import com.example.filemanager.repository.settings.SettingsRepository;
 import com.example.filemanager.util.SearchDirectoryItemsUtil;
 import com.example.filemanager.util.SortDirectoryItemsUtil;
 
+import java.util.ArrayList;
 import java.util.EmptyStackException;
 import java.util.List;
 import java.util.Stack;
 
+import io.reactivex.CompletableObserver;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
@@ -32,10 +34,15 @@ public class DirectoryViewModel extends ViewModel {
     private Stack<String> directories = new Stack<>();
     private List<DirectoryItem> cachedDirectoryContent;
 
+    private List<DirectoryItem> itemsToMove = new ArrayList<>();
+    private List<DirectoryItem> itemsToCopy = new ArrayList<>();
+
     public Subject<Boolean> isLoading = BehaviorSubject.createDefault(true);
     public Subject<String> currentDirectory = BehaviorSubject.create();
     public Subject<String> searchQuery = BehaviorSubject.create();
     public Subject<List<DirectoryItem>> directoryContent = BehaviorSubject.create();
+    public BehaviorSubject<Boolean> isCopyModeEnabled = BehaviorSubject.create();
+    public Subject<Boolean> isCopyDialogVisible = BehaviorSubject.create();
     public Subject<Boolean> closeScreen = PublishSubject.create();
 
 
@@ -46,22 +53,12 @@ public class DirectoryViewModel extends ViewModel {
     }
 
 
-    public void goToParentDirectory() {
-        String parentDirectory;
-
-        try {
-            directories.pop();
-            parentDirectory = directories.pop();
-        } catch (EmptyStackException ex) {
-            parentDirectory = null;
+    public void handleBackPressed() {
+        if (isCopyModeEnabled()) {
+            disableCopyMode();
+        } else {
+            goToParentDirectory();
         }
-
-        if (parentDirectory == null) {
-            closeScreen.onNext(true);
-            return;
-        }
-
-        goToDirectory(parentDirectory);
     }
 
     public void goToDirectory(@NonNull String directory) {
@@ -121,11 +118,45 @@ public class DirectoryViewModel extends ViewModel {
         disposable.add(subscription);
     }
 
-    public void renameDirectoryItem(@NonNull String newName, @NonNull DirectoryItem item) {
+    public void cut(@NonNull DirectoryItem item) {
+        itemsToMove.add(item);
+        enableCopyMode();
+    }
+
+    public void copy(@NonNull DirectoryItem item) {
+        itemsToCopy.add(item);
+        enableCopyMode();
+    }
+
+    public void paste() {
+        isCopyDialogVisible.onNext(true);
+
+        String currentDirectory = directories.peek();
+
+        Disposable subscription = directoryRepository
+                .moveAndCopy(currentDirectory, itemsToMove, itemsToCopy)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        () -> {
+                            isCopyDialogVisible.onNext(false);
+                            disableCopyMode();
+                        },
+                        error -> {
+                            isCopyDialogVisible.onNext(false);
+                            disableCopyMode();
+                            error.printStackTrace();
+                        }
+                );
+
+        disposable.add(subscription);
+    }
+
+    public void rename(@NonNull String newName, @NonNull DirectoryItem item) {
         isLoading.onNext(true);
 
         Disposable subscription = directoryRepository
-                .renameDirectoryItem(newName, item)
+                .rename(newName, item)
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         this::refreshCurrentDirectory,
                         error -> {
@@ -137,11 +168,12 @@ public class DirectoryViewModel extends ViewModel {
         disposable.add(subscription);
     }
 
-    public void deleteDirectoryItem(@NonNull DirectoryItem item) {
+    public void delete(@NonNull DirectoryItem item) {
         isLoading.onNext(true);
 
         Disposable subscription = directoryRepository
-                .deleteDirectoryItem(item)
+                .delete(item)
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         this::refreshCurrentDirectory,
                         error -> {
@@ -153,6 +185,24 @@ public class DirectoryViewModel extends ViewModel {
         disposable.add(subscription);
     }
 
+
+    private void goToParentDirectory() {
+        String parentDirectory;
+
+        try {
+            directories.pop();
+            parentDirectory = directories.pop();
+        } catch (EmptyStackException ex) {
+            parentDirectory = null;
+        }
+
+        if (parentDirectory == null) {
+            closeScreen.onNext(true);
+            return;
+        }
+
+        goToDirectory(parentDirectory);
+    }
 
     private void refreshCurrentDirectory() {
         String currentDirectory = directories.peek();
@@ -181,6 +231,7 @@ public class DirectoryViewModel extends ViewModel {
         disposable.add(subscription);
     }
 
+
     @NonNull
     private List<DirectoryItem> sortDirectoryItems(@NonNull List<DirectoryItem> items) {
         SortType sortType = settingsRepository.getSortType();
@@ -190,6 +241,28 @@ public class DirectoryViewModel extends ViewModel {
     @NonNull
     private List<DirectoryItem> searchDirectoryItems(@NonNull String query, @NonNull List<DirectoryItem> items) {
         return SearchDirectoryItemsUtil.searchDirectoryItems(query, items);
+    }
+
+
+    private boolean isCopyModeEnabled() {
+        return !itemsToMove.isEmpty() || !itemsToCopy.isEmpty();
+    }
+
+    private void enableCopyMode() {
+        Boolean enabled = isCopyModeEnabled.getValue();
+        if (enabled == null || !enabled) {
+            isCopyModeEnabled.onNext(true);
+        }
+    }
+
+    private void disableCopyMode() {
+        Boolean enabled = isCopyModeEnabled.getValue();
+        if (enabled == null || enabled) {
+            isCopyModeEnabled.onNext(false);
+        }
+
+        itemsToMove.clear();
+        itemsToCopy.clear();
     }
 
 

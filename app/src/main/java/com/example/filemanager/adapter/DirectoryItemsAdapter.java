@@ -34,9 +34,12 @@ public class DirectoryItemsAdapter extends RecyclerView.Adapter<DirectoryItemsAd
 
     public interface Listener {
         void onDirectoryItemClicked(@NonNull DirectoryItem item);
+        void onDirectoryItemCutClicked(@NonNull DirectoryItem item);
+        void onDirectoryItemCopyClicked(@NonNull DirectoryItem item);
         void onDirectoryItemRenameClicked(@NonNull DirectoryItem item);
         void onDirectoryItemDeleteClicked(@NonNull DirectoryItem item);
         void onDirectoryItemInfoClicked(@NonNull DirectoryItem item);
+        void onDirectoryItemShareClicked(@NonNull DirectoryItem item);
     }
 
 
@@ -175,6 +178,14 @@ public class DirectoryItemsAdapter extends RecyclerView.Adapter<DirectoryItemsAd
 
         private void handlePopupMenuItemClicked(@IdRes int itemId, @NonNull DirectoryItem item) {
             switch (itemId) {
+                case R.id.item_cut: {
+                    listener.onDirectoryItemCutClicked(item);
+                    break;
+                }
+                case R.id.item_copy: {
+                    listener.onDirectoryItemCopyClicked(item);
+                    break;
+                }
                 case R.id.item_rename: {
                     listener.onDirectoryItemRenameClicked(item);
                     break;
@@ -185,6 +196,10 @@ public class DirectoryItemsAdapter extends RecyclerView.Adapter<DirectoryItemsAd
                 }
                 case R.id.item_info: {
                     listener.onDirectoryItemInfoClicked(item);
+                    break;
+                }
+                case R.id.item_share: {
+                    listener.onDirectoryItemShareClicked(item);
                     break;
                 }
             }

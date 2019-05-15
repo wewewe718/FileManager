@@ -20,13 +20,21 @@ public class MockDirectoryRepository implements DirectoryRepository {
     @Override
     public Single<List<DirectoryItem>> getDirectoryContent(@NonNull String directory) {
         return Single.just(createMockDirectoryItemList(directory))
-                .delay(1500, TimeUnit.MILLISECONDS)
+                .delay(500, TimeUnit.MILLISECONDS)
                 .subscribeOn(Schedulers.io());
     }
 
     @NonNull
     @Override
-    public Completable renameDirectoryItem(@NonNull String newName, @NonNull DirectoryItem item) {
+    public Completable moveAndCopy(@NonNull String targetDirectory, @NonNull List<DirectoryItem> itemsToMove, @NonNull List<DirectoryItem> itemsToCopy) {
+        return Completable.complete()
+                .delay(3500, TimeUnit.MILLISECONDS)
+                .subscribeOn(Schedulers.io());
+    }
+
+    @NonNull
+    @Override
+    public Completable rename(@NonNull String newName, @NonNull DirectoryItem item) {
         return Completable.complete()
                 .delay(1500, TimeUnit.MILLISECONDS)
                 .subscribeOn(Schedulers.io());
@@ -34,7 +42,7 @@ public class MockDirectoryRepository implements DirectoryRepository {
 
     @NonNull
     @Override
-    public Completable deleteDirectoryItem(@NonNull DirectoryItem item) {
+    public Completable delete(@NonNull DirectoryItem item) {
         return Completable.complete()
                 .delay(1500, TimeUnit.MILLISECONDS)
                 .subscribeOn(Schedulers.io());

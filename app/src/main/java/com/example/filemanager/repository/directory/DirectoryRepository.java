@@ -14,8 +14,11 @@ public interface DirectoryRepository {
     Single<List<DirectoryItem>> getDirectoryContent(@NonNull String directory);
 
     @NonNull
-    Completable renameDirectoryItem(@NonNull String newName, @NonNull DirectoryItem item);
+    Completable moveAndCopy(@NonNull String targetDirectory, @NonNull List<DirectoryItem> itemsToMove, @NonNull List<DirectoryItem> itemsToCopy);
 
     @NonNull
-    Completable deleteDirectoryItem(@NonNull DirectoryItem item);
+    Completable rename(@NonNull String newName, @NonNull DirectoryItem item);
+
+    @NonNull
+    Completable delete(@NonNull DirectoryItem item);
 }
