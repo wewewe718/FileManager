@@ -2,6 +2,7 @@ package com.example.filemanager.adapter;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.res.Resources;
 import android.databinding.DataBindingUtil;
 import android.graphics.Color;
 import android.support.annotation.DrawableRes;
@@ -40,12 +41,14 @@ public class DirectoryItemsAdapter extends RecyclerView.Adapter<DirectoryItemsAd
         void onDirectoryItemDeleteClicked(@NonNull DirectoryItem item);
         void onDirectoryItemInfoClicked(@NonNull DirectoryItem item);
         void onDirectoryItemShareClicked(@NonNull DirectoryItem item);
+        void onItemSelectionChanged(boolean isInSelectMode);
     }
 
 
     private List<DirectoryItem> data = Collections.emptyList();
     private String searchQuery = "";
     private Listener listener;
+    private int selectedItemsCount;
 
 
     public DirectoryItemsAdapter(Listener listener) {
@@ -83,7 +86,18 @@ public class DirectoryItemsAdapter extends RecyclerView.Adapter<DirectoryItemsAd
     }
 
 
+    private void notifyItemSelectionChanged() {
+        boolean isInSelectMode = isInSelectMode();
+        listener.onItemSelectionChanged(isInSelectMode);
+    }
+
+    private boolean isInSelectMode() {
+        return selectedItemsCount > 0;
+    }
+
+
     class ViewHolder extends RecyclerView.ViewHolder {
+        private boolean isItemSelected;
         private ItemDirectoryItemBinding binding;
 
         public ViewHolder(@NonNull ItemDirectoryItemBinding binding) {
@@ -92,13 +106,37 @@ public class DirectoryItemsAdapter extends RecyclerView.Adapter<DirectoryItemsAd
         }
 
         private void bind(@NonNull DirectoryItem item) {
-            binding.getRoot().setOnClickListener(v -> listener.onDirectoryItemClicked(item));
-            binding.imageViewMore.setOnClickListener(v -> showPopupMenu(v, item));
+            initEventHandlers(item);
 
             showDirectoryItemName(item);
             showDirectoryItemTypeImage(item);
             showDateIfNeeded(item);
             showFileSizeIfNeeded(item);
+        }
+
+        private void initEventHandlers(@NonNull DirectoryItem item) {
+            binding.imageViewMore.setOnClickListener(v -> showPopupMenu(v, item));
+
+            binding.getRoot().setOnClickListener(v -> {
+                handleItemClicked(item);
+            });
+
+            binding.getRoot().setOnLongClickListener(v -> {
+                handleItemLongClicked();
+                return true;
+            });
+        }
+
+        private void handleItemClicked(@NonNull DirectoryItem item) {
+            if (isInSelectMode()) {
+                toggleItemSelected();
+            } else {
+                listener.onDirectoryItemClicked(item);
+            }
+        }
+
+        private void handleItemLongClicked() {
+            toggleItemSelected();
         }
 
         private void showDirectoryItemName(@NonNull DirectoryItem item) {
@@ -151,6 +189,31 @@ public class DirectoryItemsAdapter extends RecyclerView.Adapter<DirectoryItemsAd
                     return R.drawable.ic_other_file;
             }
             return -1;
+        }
+
+        private void toggleItemSelected() {
+            isItemSelected = !isItemSelected;
+
+            int backgroundColorId;
+            int moreButtonVisibility;
+
+            if (isItemSelected) {
+                selectedItemsCount++;
+                backgroundColorId = R.color.light_gray;
+                moreButtonVisibility = View.INVISIBLE;
+            } else {
+                selectedItemsCount--;
+                backgroundColorId = R.color.transparent;
+                moreButtonVisibility = View.VISIBLE;
+            }
+
+            Resources resources = binding.getRoot().getContext().getResources();
+            int backgroundColor = resources.getColor(backgroundColorId);
+
+            binding.getRoot().setBackgroundColor(backgroundColor);
+            binding.imageViewMore.setVisibility(moreButtonVisibility);
+
+            notifyItemSelectionChanged();
         }
 
         @SuppressLint("RestrictedApi")

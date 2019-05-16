@@ -15,6 +15,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.SearchView;
+import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -44,15 +45,18 @@ public class DirectoryActivity extends AppCompatActivity implements
     private static final String DIRECTORY_INTENT_KEY = "DIRECTORY_INTENT_KEY";
     private static final String SEARCH_VIEW_QUERY_KEY = "SEARCH_VIEW_QUERY_KEY";
 
+    private CompositeDisposable viewModelDisposable = new CompositeDisposable();
+    private DirectoryViewModel viewModel;
+
     private DirectoryItemsAdapter adapter = new DirectoryItemsAdapter(this);
     private CopyDialog copyDialog = new CopyDialog();
     private ActivityDirectoryBinding binding;
 
-    private CompositeDisposable viewModelDisposable = new CompositeDisposable();
-    private DirectoryViewModel viewModel;
-
     private SearchView searchView;
     private String searchQuery = "";
+
+    private ActionMode.Callback actionModeCallback = new ActionModeCallback();
+    private ActionMode actionMode;
 
 
     public static void start(@NonNull Context context, @NonNull String directory) {
@@ -179,6 +183,11 @@ public class DirectoryActivity extends AppCompatActivity implements
     @Override
     public void onDirectoryItemShareClicked(@NonNull DirectoryItem item) {
 
+    }
+
+    @Override
+    public void onItemSelectionChanged(boolean isInSelectMode) {
+        showOrHideActionMode(isInSelectMode);
     }
 
 
@@ -314,6 +323,15 @@ public class DirectoryActivity extends AppCompatActivity implements
         }
     }
 
+    private void showOrHideActionMode(boolean isActionModeEnabled) {
+        if (isActionModeEnabled) {
+            actionMode = startActionMode(actionModeCallback);
+        } else {
+            actionMode.finish();
+            actionMode = null;
+        }
+    }
+
     private void openFile(@NonNull DirectoryItem item) {
         Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(item.getFilePath()));
         if (intent.resolveActivity(getPackageManager()) == null) {
@@ -366,5 +384,30 @@ public class DirectoryActivity extends AppCompatActivity implements
     private void showDirectoryItemInfoDialog(@NonNull DirectoryItem item) {
         DirectoryItemInfoDialogFragment dialog = DirectoryItemInfoDialogFragment.newInstance(item);
         dialog.show(getSupportFragmentManager(), "DirectoryItemInfoDialogFragment");
+    }
+
+
+    private static class ActionModeCallback implements ActionMode.Callback {
+        @Override
+        public boolean onCreateActionMode(ActionMode actionMode, Menu menu) {
+            actionMode.getMenuInflater().inflate(R.menu.menu_directory_activity_action_mode, menu);
+            actionMode.setTitle("Title");
+            return true;
+        }
+
+        @Override
+        public boolean onPrepareActionMode(ActionMode actionMode, Menu menu) {
+            return false;
+        }
+
+        @Override
+        public boolean onActionItemClicked(ActionMode actionMode, MenuItem menuItem) {
+            return false;
+        }
+
+        @Override
+        public void onDestroyActionMode(ActionMode actionMode) {
+
+        }
     }
 }
