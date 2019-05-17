@@ -65,6 +65,11 @@ public class DirectoryItemsAdapter extends RecyclerView.Adapter<DirectoryItemsAd
         notifyDataSetChanged();
     }
 
+    public void resetSelection() {
+        selectedItemsCount = 0;
+        notifyDataSetChanged();
+    }
+
 
     @NonNull
     @Override
@@ -106,12 +111,18 @@ public class DirectoryItemsAdapter extends RecyclerView.Adapter<DirectoryItemsAd
         }
 
         private void bind(@NonNull DirectoryItem item) {
+            resetItemView();
             initEventHandlers(item);
-
             showDirectoryItemName(item);
             showDirectoryItemTypeImage(item);
             showDateIfNeeded(item);
             showFileSizeIfNeeded(item);
+        }
+
+        private void resetItemView() {
+            Resources resources = binding.getRoot().getResources();
+            binding.getRoot().setBackgroundColor(resources.getColor(R.color.transparent));
+            binding.imageViewMore.setVisibility(View.VISIBLE);
         }
 
         private void initEventHandlers(@NonNull DirectoryItem item) {

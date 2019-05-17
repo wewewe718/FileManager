@@ -21,6 +21,8 @@
     <string name="info">Info</string>
     <string name="rename">Rename</string>
     <string name="share">Share</string>
+    <string name="select_all">Select all</string>
+    <string name="select_items">Select</string>
 
     <string name="sort_type_dialog_title">Sort by:</string>
     <string name="sort_type_dialog_positive_button">OK</string>

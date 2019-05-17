@@ -4,22 +4,27 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     >
     <item
-        android:id="@+id/item1"
-        android:title="item1"
-        app:showAsAction="always"
-        />
-    <item
-        android:id="@+id/item2"
+        android:id="@+id/item_action_mode_delete"
+        android:title="@string/delete"
+        android:icon="@drawable/ic_delete_white"
         app:showAsAction="ifRoom"
-        android:title="item2"
         />
     <item
-        android:id="@+id/item3"
-        android:title="item3"
-        />
-    <item
-        android:id="@+id/item4"
+        android:id="@+id/item_action_mode_cut"
+        android:title="@string/cut"
+        android:icon="@drawable/ic_cut_white"
         app:showAsAction="never"
-        android:title="item4"
+        />
+    <item
+        android:id="@+id/item_action_mode_copy"
+        android:title="@string/copy"
+        android:icon="@drawable/ic_copy_white"
+        app:showAsAction="never"
+        />
+    <item
+        android:id="@+id/item_action_mode_select_all"
+        android:title="@string/select_all"
+        android:icon="@drawable/ic_select_all"
+        app:showAsAction="never"
         />
 </menu>

@@ -324,9 +324,12 @@ public class DirectoryActivity extends AppCompatActivity implements
     }
 
     private void showOrHideActionMode(boolean isActionModeEnabled) {
-        if (isActionModeEnabled) {
+        if (isActionModeEnabled && actionMode == null) {
             actionMode = startActionMode(actionModeCallback);
-        } else {
+            return;
+        }
+
+        if (!isActionModeEnabled && actionMode != null) {
             actionMode.finish();
             actionMode = null;
         }
@@ -387,11 +390,11 @@ public class DirectoryActivity extends AppCompatActivity implements
     }
 
 
-    private static class ActionModeCallback implements ActionMode.Callback {
+    private class ActionModeCallback implements ActionMode.Callback {
         @Override
         public boolean onCreateActionMode(ActionMode actionMode, Menu menu) {
             actionMode.getMenuInflater().inflate(R.menu.menu_directory_activity_action_mode, menu);
-            actionMode.setTitle("Title");
+            actionMode.setTitle(R.string.select_items);
             return true;
         }
 
@@ -407,7 +410,8 @@ public class DirectoryActivity extends AppCompatActivity implements
 
         @Override
         public void onDestroyActionMode(ActionMode actionMode) {
-
+            DirectoryActivity.this.actionMode = null;
+            DirectoryActivity.this.adapter.resetSelection();
         }
     }
 }
