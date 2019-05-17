@@ -31,7 +31,6 @@ import com.example.filemanager.dialog.DirectoryItemInfoDialogFragment;
 import com.example.filemanager.dialog.RenameDirectoryItemDialogFragment;
 import com.example.filemanager.dialog.SortTypeDialogFragment;
 import com.example.filemanager.model.DirectoryItem;
-import com.example.filemanager.model.DirectoryItemType;
 import com.example.filemanager.repository.directory.DirectoryRepository;
 import com.example.filemanager.repository.settings.SettingsRepository;
 import com.example.filemanager.viewmodel.DirectoryViewModel;
@@ -141,11 +140,11 @@ public class DirectoryActivity extends AppCompatActivity implements
 
                 break;
             }
-            case R.id.item_search: {
-                break;
-            }
             case R.id.item_sort: {
                 showSortTypeDialog();
+                break;
+            }
+            default: {
                 break;
             }
         }
@@ -155,70 +154,68 @@ public class DirectoryActivity extends AppCompatActivity implements
 
     @Override
     public void onDirectoryItemClicked(@NonNull DirectoryItem item) {
-        if (item.getType().equals(DirectoryItemType.DIRECTORY)) {
-            viewModel.goToDirectory(item.getFilePath());
-        } else {
-            openFile(item);
-        }
+       viewModel.handleItemClicked(item);
     }
 
     @Override
     public void onDirectoryItemCutClicked(@NonNull DirectoryItem item) {
-        viewModel.cut(item);
+        viewModel.handleCutClicked(item);
     }
 
     @Override
     public void onDirectoryItemCopyClicked(@NonNull DirectoryItem item) {
-        viewModel.copy(item);
+        viewModel.handleCopyClicked(item);
     }
 
     @Override
     public void onDirectoryItemRenameClicked(@NonNull DirectoryItem item) {
-        showRenameDirectoryItemDialog(item);
+        viewModel.handleRenameClicked(item);
     }
 
     @Override
     public void onDirectoryItemDeleteClicked(@NonNull DirectoryItem item) {
-        showDeleteDirectoryItemDialog(item);
+        viewModel.handleDeleteClicked(item);
     }
 
     @Override
     public void onDirectoryItemInfoClicked(@NonNull DirectoryItem item) {
-        showDirectoryItemInfoDialog(item);
+        viewModel.handleInfoClicked(item);
     }
 
     @Override
     public void onDirectoryItemShareClicked(@NonNull DirectoryItem item) {
-
+        viewModel.handleShareClicked(item);
     }
 
     @Override
     public void onItemSelectionChanged(boolean isInSelectMode) {
+        // TODO: Refactor action mode
         showOrHideActionMode(isInSelectMode);
     }
 
 
     @Override
     public void onSortTypeChanged() {
-        viewModel.sortDirectoryContent();
+        viewModel.handleSortTypeChanged();
     }
 
     @Override
     public void onRenameDirectoryItem(@NonNull String newName, @NonNull DirectoryItem item) {
-        viewModel.rename(newName, item);
+        viewModel.handleRenameConfirmed(newName, item);
     }
 
     @Override
     public void onDeleteDirectoryItem(@NonNull DirectoryItem item) {
-        viewModel.delete(item);
+        viewModel.handleDeleteConfirmed(item);
     }
 
     @Override
     public void onDeleteDirectoryItems() {
         List<DirectoryItem> selectedItems = adapter.getSelectedItems();
         showOrHideActionMode(false);
-        viewModel.delete(selectedItems);
+        viewModel.handleDeleteConfirmed(selectedItems);
     }
+
 
     private void initActionBar() {
         ActionBar actionBar = getSupportActionBar();
@@ -242,7 +239,7 @@ public class DirectoryActivity extends AppCompatActivity implements
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextChange(@NonNull String query) {
-                viewModel.search(query);
+                viewModel.handleSearchQueryChanged(query);
                 return false;
             }
 
@@ -254,7 +251,7 @@ public class DirectoryActivity extends AppCompatActivity implements
     }
 
     private void initPasteButton() {
-        binding.fabPaste.setOnClickListener(v -> viewModel.paste());
+        binding.fabPaste.setOnClickListener(v -> viewModel.handlePasteClicked());
     }
 
 
@@ -280,11 +277,17 @@ public class DirectoryActivity extends AppCompatActivity implements
         viewModelDisposable.addAll(
                 viewModel.isLoading.subscribe(this::showIsLoading),
                 viewModel.currentDirectory.subscribe(this::showCurrentDirectory),
-                viewModel.searchQuery.subscribe(this::showSearchQuery),
                 viewModel.directoryContent.subscribe(this::showDirectoryContent),
+                viewModel.searchQuery.subscribe(this::showSearchQuery),
                 viewModel.isCopyModeEnabled.subscribe(this::showCopyModeEnabled),
                 viewModel.isCopyDialogVisible.subscribe(this::showOrHideCopyDialog),
-                viewModel.closeScreen.subscribe(f -> closeScreen())
+
+                viewModel.openFileEvent.subscribe(this::openFile),
+                viewModel.showRenameItemDialogEvent.subscribe(this::showRenameDirectoryItemDialog),
+                viewModel.showDeleteItemDialogEvent.subscribe(this::showDeleteDirectoryItemDialog),
+                viewModel.showDeleteItemsDialogEvent.subscribe(this::showDeleteDirectoryItemsDialog),
+                viewModel.showInfoItemDialogEvent.subscribe(this::showDirectoryItemInfoDialog),
+                viewModel.closeScreenEvent.subscribe(u -> closeScreen())
         );
     }
 
@@ -427,15 +430,15 @@ public class DirectoryActivity extends AppCompatActivity implements
 
             switch (menuItem.getItemId()) {
                 case R.id.item_action_mode_delete: {
-                    showDeleteDirectoryItemsDialog(selectedItems);
+                    viewModel.handleDeleteClicked(selectedItems);
                     return true;
                 }
                 case R.id.item_action_mode_cut: {
-                    viewModel.cut(selectedItems);
+                    viewModel.handleCutClicked(selectedItems);
                     break;
                 }
                 case R.id.item_action_mode_copy: {
-                    viewModel.copy(selectedItems);
+                    viewModel.handleCopyClicked(selectedItems);
                     break;
                 }
                 case R.id.item_action_mode_select_all: {
