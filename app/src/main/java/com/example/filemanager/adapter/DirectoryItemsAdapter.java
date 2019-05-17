@@ -28,6 +28,7 @@ import com.example.filemanager.model.DirectoryItemType;
 import com.example.filemanager.util.DateFormatUtil;
 import com.example.filemanager.util.FileSizeFormatUtil;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -48,7 +49,7 @@ public class DirectoryItemsAdapter extends RecyclerView.Adapter<DirectoryItemsAd
     private List<DirectoryItem> data = Collections.emptyList();
     private String searchQuery = "";
     private Listener listener;
-    private int selectedItemsCount;
+    private List<DirectoryItem> selectedItems = new ArrayList<>();
 
 
     public DirectoryItemsAdapter(Listener listener) {
@@ -66,8 +67,19 @@ public class DirectoryItemsAdapter extends RecyclerView.Adapter<DirectoryItemsAd
     }
 
     public void resetSelection() {
-        selectedItemsCount = 0;
+        selectedItems.clear();
         notifyDataSetChanged();
+    }
+
+    public void selectAll() {
+        selectedItems.clear();
+        selectedItems.addAll(data);
+        notifyDataSetChanged();
+    }
+
+    @NonNull
+    public List<DirectoryItem> getSelectedItems() {
+        return selectedItems;
     }
 
 
@@ -82,7 +94,9 @@ public class DirectoryItemsAdapter extends RecyclerView.Adapter<DirectoryItemsAd
     @Override
     public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
         DirectoryItem item = data.get(i);
-        viewHolder.bind(item);
+        boolean isItemSelected = selectedItems.contains(item);
+        boolean isInSelectMode = isInSelectMode();
+        viewHolder.bind(item, isItemSelected, isInSelectMode);
     }
 
     @Override
@@ -91,18 +105,50 @@ public class DirectoryItemsAdapter extends RecyclerView.Adapter<DirectoryItemsAd
     }
 
 
+    private void handleItemClicked(@NonNull DirectoryItem item, boolean isItemSelected) {
+        if (isInSelectMode()) {
+            handleItemSelected(item, isItemSelected);
+        } else {
+            listener.onDirectoryItemClicked(item);
+        }
+    }
+
+    private void handleItemLongClicked(@NonNull DirectoryItem item, boolean isItemSelected) {
+        handleItemSelected(item, isItemSelected);
+    }
+
+    private void handleItemSelected(@NonNull DirectoryItem item, boolean isItemSelected) {
+        isItemSelected = !isItemSelected;
+        if (isItemSelected) {
+            addSelectedItem(item);
+        } else {
+            removeSelectedItem(item);
+        }
+    }
+
+    private boolean isInSelectMode() {
+        return !selectedItems.isEmpty();
+    }
+
+    private void addSelectedItem(@NonNull DirectoryItem item) {
+        selectedItems.add(item);
+        notifyItemSelectionChanged();
+        notifyDataSetChanged();
+    }
+
+    private void removeSelectedItem(@NonNull DirectoryItem item) {
+        selectedItems.remove(item);
+        notifyItemSelectionChanged();
+        notifyDataSetChanged();
+    }
+
     private void notifyItemSelectionChanged() {
         boolean isInSelectMode = isInSelectMode();
         listener.onItemSelectionChanged(isInSelectMode);
     }
 
-    private boolean isInSelectMode() {
-        return selectedItemsCount > 0;
-    }
-
 
     class ViewHolder extends RecyclerView.ViewHolder {
-        private boolean isItemSelected;
         private ItemDirectoryItemBinding binding;
 
         public ViewHolder(@NonNull ItemDirectoryItemBinding binding) {
@@ -110,44 +156,27 @@ public class DirectoryItemsAdapter extends RecyclerView.Adapter<DirectoryItemsAd
             this.binding = binding;
         }
 
-        private void bind(@NonNull DirectoryItem item) {
-            resetItemView();
-            initEventHandlers(item);
+        private void bind(@NonNull DirectoryItem item, boolean isItemSelected, boolean isInSelectMode) {
+            initEventHandlers(item, isItemSelected);
             showDirectoryItemName(item);
             showDirectoryItemTypeImage(item);
             showDateIfNeeded(item);
             showFileSizeIfNeeded(item);
+            showItemSelected(isItemSelected);
+            showIsInSelectMode(isInSelectMode);
         }
 
-        private void resetItemView() {
-            Resources resources = binding.getRoot().getResources();
-            binding.getRoot().setBackgroundColor(resources.getColor(R.color.transparent));
-            binding.imageViewMore.setVisibility(View.VISIBLE);
-        }
-
-        private void initEventHandlers(@NonNull DirectoryItem item) {
+        private void initEventHandlers(@NonNull DirectoryItem item, boolean isItemSelected) {
             binding.imageViewMore.setOnClickListener(v -> showPopupMenu(v, item));
 
             binding.getRoot().setOnClickListener(v -> {
-                handleItemClicked(item);
+                handleItemClicked(item, isItemSelected);
             });
 
             binding.getRoot().setOnLongClickListener(v -> {
-                handleItemLongClicked();
+                handleItemLongClicked(item, isItemSelected);
                 return true;
             });
-        }
-
-        private void handleItemClicked(@NonNull DirectoryItem item) {
-            if (isInSelectMode()) {
-                toggleItemSelected();
-            } else {
-                listener.onDirectoryItemClicked(item);
-            }
-        }
-
-        private void handleItemLongClicked() {
-            toggleItemSelected();
         }
 
         private void showDirectoryItemName(@NonNull DirectoryItem item) {
@@ -183,6 +212,18 @@ public class DirectoryItemsAdapter extends RecyclerView.Adapter<DirectoryItemsAd
             binding.textViewProperty.setText(formattedFileSize);
         }
 
+        private void showItemSelected(boolean isItemSelected) {
+            Resources resources = binding.getRoot().getContext().getResources();
+            int backgroundColorId = isItemSelected ? R.color.light_gray : R.color.transparent;
+            int backgroundColor = resources.getColor(backgroundColorId);
+            binding.getRoot().setBackgroundColor(backgroundColor);
+        }
+
+        private void showIsInSelectMode(boolean isInSelectMode) {
+            int moreButtonVisibility = isInSelectMode ? View.INVISIBLE : View.VISIBLE;
+            binding.imageViewMore.setVisibility(moreButtonVisibility);
+        }
+
         @DrawableRes
         private int mapDirectoryTypeToDrawable(@NonNull DirectoryItemType itemType) {
             switch (itemType) {
@@ -200,31 +241,6 @@ public class DirectoryItemsAdapter extends RecyclerView.Adapter<DirectoryItemsAd
                     return R.drawable.ic_other_file;
             }
             return -1;
-        }
-
-        private void toggleItemSelected() {
-            isItemSelected = !isItemSelected;
-
-            int backgroundColorId;
-            int moreButtonVisibility;
-
-            if (isItemSelected) {
-                selectedItemsCount++;
-                backgroundColorId = R.color.light_gray;
-                moreButtonVisibility = View.INVISIBLE;
-            } else {
-                selectedItemsCount--;
-                backgroundColorId = R.color.transparent;
-                moreButtonVisibility = View.VISIBLE;
-            }
-
-            Resources resources = binding.getRoot().getContext().getResources();
-            int backgroundColor = resources.getColor(backgroundColorId);
-
-            binding.getRoot().setBackgroundColor(backgroundColor);
-            binding.imageViewMore.setVisibility(moreButtonVisibility);
-
-            notifyItemSelectionChanged();
         }
 
         @SuppressLint("RestrictedApi")

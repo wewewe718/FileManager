@@ -49,6 +49,14 @@ public class MockDirectoryRepository implements DirectoryRepository {
     }
 
     @NonNull
+    @Override
+    public Completable delete(@NonNull List<DirectoryItem> items) {
+        return Completable.complete()
+                .delay(1500, TimeUnit.MILLISECONDS)
+                .subscribeOn(Schedulers.io());
+    }
+
+    @NonNull
     private List<DirectoryItem> createMockDirectoryItemList(@NonNull String directory) {
         List<DirectoryItem> directoryItems = new ArrayList<>();
         directoryItems.add(new DirectoryItem(DirectoryItemType.DIRECTORY, "directory", directory + "/child", new Date(), 0));

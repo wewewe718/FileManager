@@ -11,15 +11,20 @@ import android.support.v7.app.AlertDialog;
 import com.example.filemanager.R;
 import com.example.filemanager.model.DirectoryItem;
 
+import java.util.List;
+
 public class DeleteDirectoryItemDialogFragment extends DialogFragment {
 
     public interface Listener {
         void onDeleteDirectoryItem(@NonNull DirectoryItem item);
+        void onDeleteDirectoryItems();
     }
 
 
     private static final String DIRECTORY_ITEM_ARGUMENTS_KEY = "DIRECTORY_ITEM_ARGUMENTS_KEY";
+    private static final String DIRECTORY_ITEM_COUNT_ARGUMENTS_KEY = "DIRECTORY_ITEM_COUNT_ARGUMENTS_KEY";
     private Listener listener;
+
 
     @NonNull
     public static DeleteDirectoryItemDialogFragment newInstance(@NonNull DirectoryItem item) {
@@ -31,6 +36,17 @@ public class DeleteDirectoryItemDialogFragment extends DialogFragment {
         return fragment;
     }
 
+    @NonNull
+    public static DeleteDirectoryItemDialogFragment newInstance(@NonNull List<DirectoryItem> items) {
+        Bundle arguments = new Bundle();
+        arguments.putInt(DIRECTORY_ITEM_COUNT_ARGUMENTS_KEY, items.size());
+
+        DeleteDirectoryItemDialogFragment fragment = new DeleteDirectoryItemDialogFragment();
+        fragment.setArguments(arguments);
+        return fragment;
+    }
+
+
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -40,15 +56,39 @@ public class DeleteDirectoryItemDialogFragment extends DialogFragment {
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
-        DirectoryItem item = (DirectoryItem) getArguments().getSerializable(DIRECTORY_ITEM_ARGUMENTS_KEY);
-        String message = getString(R.string.delete_directory_item_dialog_message, item.getName());
+        Context context = getContext();
+        if (context == null) {
+            throw new IllegalStateException("Context is null");
+        }
 
-        return new AlertDialog.Builder(getActivity())
+        Bundle arguments = getArguments();
+        if (arguments == null) {
+            throw new IllegalStateException("Arguments are null");
+        }
+
+        DirectoryItem item = (DirectoryItem) arguments.getSerializable(DIRECTORY_ITEM_ARGUMENTS_KEY);
+        int itemCount = arguments.getInt(DIRECTORY_ITEM_COUNT_ARGUMENTS_KEY, Integer.MIN_VALUE);
+        if (item == null && itemCount == Integer.MIN_VALUE) {
+            throw new IllegalStateException("No arguments");
+        }
+
+        String message;
+        if (item != null) {
+            message = getString(R.string.delete_directory_item_dialog_message, item.getName());
+        } else {
+            message = getString(R.string.delete_directory_item_count_dialog_message, itemCount);
+        }
+
+        return new AlertDialog.Builder(context)
                 .setTitle(R.string.delete_directory_item_dialog_title)
                 .setMessage(message)
                 .setNegativeButton(R.string.delete_directory_item_dialog_negative_button, null)
                 .setPositiveButton(R.string.delete_directory_item_dialog_positive_button, (dialog, which) -> {
-                    listener.onDeleteDirectoryItem(item);
+                    if (item != null) {
+                        listener.onDeleteDirectoryItem(item);
+                    } else {
+                        listener.onDeleteDirectoryItems();
+                    }
                 })
                 .create();
     }

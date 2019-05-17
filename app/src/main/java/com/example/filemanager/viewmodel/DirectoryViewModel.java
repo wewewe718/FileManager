@@ -53,8 +53,16 @@ public class DirectoryViewModel extends ViewModel {
     }
 
 
-    public void handleBackPressed() {
+    public void handleActionBarBackPressed() {
         if (isCopyModeEnabled()) {
+            disableCopyMode();
+        } else {
+            goToParentDirectory();
+        }
+    }
+
+    public void handleBackPressed() {
+        if (isRootDirectory() && isCopyModeEnabled()) {
             disableCopyMode();
         } else {
             goToParentDirectory();
@@ -123,8 +131,18 @@ public class DirectoryViewModel extends ViewModel {
         enableCopyMode();
     }
 
+    public void cut(@NonNull List<DirectoryItem> items) {
+        itemsToMove.addAll(items);
+        enableCopyMode();
+    }
+
     public void copy(@NonNull DirectoryItem item) {
         itemsToCopy.add(item);
+        enableCopyMode();
+    }
+
+    public void copy(@NonNull List<DirectoryItem> items) {
+        itemsToCopy.addAll(items);
         enableCopyMode();
     }
 
@@ -185,6 +203,27 @@ public class DirectoryViewModel extends ViewModel {
         disposable.add(subscription);
     }
 
+    public void delete(@NonNull List<DirectoryItem> items) {
+        isLoading.onNext(true);
+
+        Disposable subscription = directoryRepository
+                .delete(items)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        this::refreshCurrentDirectory,
+                        error -> {
+                            isLoading.onNext(false);
+                            error.printStackTrace();
+                        }
+                );
+
+        disposable.add(subscription);
+    }
+
+
+    private boolean isRootDirectory() {
+        return directories.size() == 1;
+    }
 
     private void goToParentDirectory() {
         String parentDirectory;

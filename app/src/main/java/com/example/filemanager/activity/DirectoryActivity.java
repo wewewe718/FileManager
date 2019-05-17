@@ -131,7 +131,14 @@ public class DirectoryActivity extends AppCompatActivity implements
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home: {
-                onBackPressed();
+                // Close search view if opened
+                if (!searchView.isIconified()) {
+                    searchView.setIconified(true);
+                    return true;
+                }
+
+                viewModel.handleActionBarBackPressed();
+
                 break;
             }
             case R.id.item_search: {
@@ -206,6 +213,12 @@ public class DirectoryActivity extends AppCompatActivity implements
         viewModel.delete(item);
     }
 
+    @Override
+    public void onDeleteDirectoryItems() {
+        List<DirectoryItem> selectedItems = adapter.getSelectedItems();
+        showOrHideActionMode(false);
+        viewModel.delete(selectedItems);
+    }
 
     private void initActionBar() {
         ActionBar actionBar = getSupportActionBar();
@@ -384,6 +397,11 @@ public class DirectoryActivity extends AppCompatActivity implements
         dialog.show(getSupportFragmentManager(), "DeleteDirectoryItemDialogFragment");
     }
 
+    private void showDeleteDirectoryItemsDialog(@NonNull List<DirectoryItem> items) {
+        DeleteDirectoryItemDialogFragment dialog = DeleteDirectoryItemDialogFragment.newInstance(items);
+        dialog.show(getSupportFragmentManager(), "DeleteDirectoryItemDialogFragment");
+    }
+
     private void showDirectoryItemInfoDialog(@NonNull DirectoryItem item) {
         DirectoryItemInfoDialogFragment dialog = DirectoryItemInfoDialogFragment.newInstance(item);
         dialog.show(getSupportFragmentManager(), "DirectoryItemInfoDialogFragment");
@@ -405,7 +423,30 @@ public class DirectoryActivity extends AppCompatActivity implements
 
         @Override
         public boolean onActionItemClicked(ActionMode actionMode, MenuItem menuItem) {
-            return false;
+            List<DirectoryItem> selectedItems = adapter.getSelectedItems();
+
+            switch (menuItem.getItemId()) {
+                case R.id.item_action_mode_delete: {
+                    showDeleteDirectoryItemsDialog(selectedItems);
+                    return true;
+                }
+                case R.id.item_action_mode_cut: {
+                    viewModel.cut(selectedItems);
+                    break;
+                }
+                case R.id.item_action_mode_copy: {
+                    viewModel.copy(selectedItems);
+                    break;
+                }
+                case R.id.item_action_mode_select_all: {
+                    adapter.selectAll();
+                    return true;
+                }
+            }
+
+            showOrHideActionMode(false);
+
+            return true;
         }
 
         @Override

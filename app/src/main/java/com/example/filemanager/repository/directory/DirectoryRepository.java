@@ -21,4 +21,7 @@ public interface DirectoryRepository {
 
     @NonNull
     Completable delete(@NonNull DirectoryItem item);
+
+    @NonNull
+    Completable delete(@NonNull List<DirectoryItem> item);
 }
