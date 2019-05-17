@@ -46,12 +46,13 @@ public class DirectoryViewModel extends ViewModel {
     public Subject<Boolean> isCopyDialogVisible = BehaviorSubject.create();
     public Subject<String> searchQuery = BehaviorSubject.create();
 
-    public Subject<DirectoryItem> openFileEvent = PublishSubject.create();
+    public Subject<Unit> showSortTypeDialogEvent = PublishSubject.create();
     public Subject<DirectoryItem> showRenameItemDialogEvent = PublishSubject.create();
     public Subject<DirectoryItem> showDeleteItemDialogEvent = PublishSubject.create();
     public Subject<List<DirectoryItem>> showDeleteItemsDialogEvent = PublishSubject.create();
     public Subject<DirectoryItem> showInfoItemDialogEvent = PublishSubject.create();
     public Subject<DirectoryItem> showShareItemDialogEvent = PublishSubject.create();
+    public Subject<DirectoryItem> openFileEvent = PublishSubject.create();
     public Subject<Unit> closeScreenEvent = PublishSubject.create();
 
 
@@ -206,6 +207,10 @@ public class DirectoryViewModel extends ViewModel {
         showShareItemDialogEvent.onNext(item);
     }
 
+    public void handleChangeSortClicked() {
+        showSortTypeDialogEvent.onNext(Unit.get());
+    }
+
     public void handleSortTypeChanged() {
         if (cachedDirectoryContent == null)  {
             return;
@@ -264,7 +269,7 @@ public class DirectoryViewModel extends ViewModel {
 
     private void goToDirectory(@NonNull String directory) {
         directories.push(directory);
-        this.currentDirectory.onNext(directory);
+        currentDirectory.onNext(directory);
         loadDirectoryContent(directory);
     }
 

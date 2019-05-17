@@ -141,7 +141,7 @@ public class DirectoryActivity extends AppCompatActivity implements
                 break;
             }
             case R.id.item_sort: {
-                showSortTypeDialog();
+                viewModel.handleChangeSortClicked();
                 break;
             }
             default: {
@@ -190,7 +190,7 @@ public class DirectoryActivity extends AppCompatActivity implements
     @Override
     public void onItemSelectionChanged(boolean isInSelectMode) {
         // TODO: Refactor action mode
-        showOrHideActionMode(isInSelectMode);
+        showActionModeVisible(isInSelectMode);
     }
 
 
@@ -212,7 +212,7 @@ public class DirectoryActivity extends AppCompatActivity implements
     @Override
     public void onDeleteDirectoryItems() {
         List<DirectoryItem> selectedItems = adapter.getSelectedItems();
-        showOrHideActionMode(false);
+        showActionModeVisible(false);
         viewModel.handleDeleteConfirmed(selectedItems);
     }
 
@@ -282,11 +282,12 @@ public class DirectoryActivity extends AppCompatActivity implements
                 viewModel.isCopyModeEnabled.subscribe(this::showCopyModeEnabled),
                 viewModel.isCopyDialogVisible.subscribe(this::showOrHideCopyDialog),
 
-                viewModel.openFileEvent.subscribe(this::openFile),
+                viewModel.showSortTypeDialogEvent.subscribe(u -> showSortTypeDialog()),
                 viewModel.showRenameItemDialogEvent.subscribe(this::showRenameDirectoryItemDialog),
                 viewModel.showDeleteItemDialogEvent.subscribe(this::showDeleteDirectoryItemDialog),
                 viewModel.showDeleteItemsDialogEvent.subscribe(this::showDeleteDirectoryItemsDialog),
                 viewModel.showInfoItemDialogEvent.subscribe(this::showDirectoryItemInfoDialog),
+                viewModel.openFileEvent.subscribe(this::openFile),
                 viewModel.closeScreenEvent.subscribe(u -> closeScreen())
         );
     }
@@ -339,55 +340,17 @@ public class DirectoryActivity extends AppCompatActivity implements
         }
     }
 
-    private void showOrHideActionMode(boolean isActionModeEnabled) {
-        if (isActionModeEnabled && actionMode == null) {
-            actionMode = startActionMode(actionModeCallback);
-            return;
-        }
-
-        if (!isActionModeEnabled && actionMode != null) {
-            actionMode.finish();
-            actionMode = null;
-        }
-    }
-
-    private void openFile(@NonNull DirectoryItem item) {
-        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(item.getFilePath()));
-        if (intent.resolveActivity(getPackageManager()) == null) {
-            showToast(R.string.unable_to_open_file);
-        } else {
-            startActivity(intent);
-        }
-    }
-
-    private void closeScreen() {
-        finish();
-    }
-
-    private void showToast(@StringRes int messageId) {
-        Toast.makeText(this, messageId, Toast.LENGTH_LONG).show();
-    }
-
-    private void restoreSearchView() {
-        if (searchQuery.isEmpty()) {
-            return;
-        }
-
-        searchView.setIconified(false);
-        searchView.setQuery(searchQuery, false);
-    }
-
-    private void showSortTypeDialog() {
-        SortTypeDialogFragment dialog = new SortTypeDialogFragment();
-        dialog.show(getSupportFragmentManager(), "SortTypeDialogFragment");
-    }
-
     private void showOrHideCopyDialog(boolean show) {
         if (show) {
             copyDialog.show(this);
         } else {
             copyDialog.dismiss();
         }
+    }
+
+    private void showSortTypeDialog() {
+        SortTypeDialogFragment dialog = new SortTypeDialogFragment();
+        dialog.show(getSupportFragmentManager(), "SortTypeDialogFragment");
     }
 
     private void showRenameDirectoryItemDialog(@NonNull DirectoryItem item) {
@@ -408,6 +371,40 @@ public class DirectoryActivity extends AppCompatActivity implements
     private void showDirectoryItemInfoDialog(@NonNull DirectoryItem item) {
         DirectoryItemInfoDialogFragment dialog = DirectoryItemInfoDialogFragment.newInstance(item);
         dialog.show(getSupportFragmentManager(), "DirectoryItemInfoDialogFragment");
+    }
+
+    private void showActionModeVisible(boolean isActionModeVisible) {
+        if (isActionModeVisible && actionMode == null) {
+            actionMode = startActionMode(actionModeCallback);
+            return;
+        }
+
+        if (!isActionModeVisible && actionMode != null) {
+            actionMode.finish();
+            actionMode = null;
+        }
+    }
+
+    private void openFile(@NonNull DirectoryItem item) {
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(item.getFilePath()));
+        if (intent.resolveActivity(getPackageManager()) == null) {
+            Toast.makeText(this, R.string.unable_to_open_file, Toast.LENGTH_LONG).show();
+        } else {
+            startActivity(intent);
+        }
+    }
+
+    private void closeScreen() {
+        finish();
+    }
+
+    private void restoreSearchView() {
+        if (searchQuery.isEmpty()) {
+            return;
+        }
+
+        searchView.setIconified(false);
+        searchView.setQuery(searchQuery, false);
     }
 
 
@@ -447,7 +444,7 @@ public class DirectoryActivity extends AppCompatActivity implements
                 }
             }
 
-            showOrHideActionMode(false);
+            showActionModeVisible(false);
 
             return true;
         }
