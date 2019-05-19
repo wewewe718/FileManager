@@ -47,6 +47,7 @@ public class DirectoryViewModel extends ViewModel {
     public Subject<String> searchQuery = BehaviorSubject.create();
 
     public Subject<Unit> showSortTypeDialogEvent = PublishSubject.create();
+    public Subject<Unit> showCreateDirectoryDialogEvent = PublishSubject.create();
     public Subject<DirectoryItem> showRenameItemDialogEvent = PublishSubject.create();
     public Subject<DirectoryItem> showDeleteItemDialogEvent = PublishSubject.create();
     public Subject<List<DirectoryItem>> showDeleteItemsDialogEvent = PublishSubject.create();
@@ -227,6 +228,27 @@ public class DirectoryViewModel extends ViewModel {
                             isLoading.onNext(false);
                             directoryContent.onNext(result);
                         },
+                        error -> {
+                            isLoading.onNext(false);
+                            error.printStackTrace();
+                        }
+                );
+
+        disposable.add(subscription);
+    }
+
+    public void handleCreateDirectoryClicked() {
+        showCreateDirectoryDialogEvent.onNext(Unit.get());
+    }
+
+    public void handleCreateDirectoryConfirmed(@NonNull String newDirectoryName) {
+        isLoading.onNext(true);
+
+        String currentDirectory = directories.peek();
+        Disposable subscription = directoryRepository
+                .createDirectory(currentDirectory, newDirectoryName)
+                .subscribe(
+                        this::refreshCurrentDirectory,
                         error -> {
                             isLoading.onNext(false);
                             error.printStackTrace();

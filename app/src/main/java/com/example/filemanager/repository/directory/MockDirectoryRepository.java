@@ -26,7 +26,15 @@ public class MockDirectoryRepository implements DirectoryRepository {
 
     @NonNull
     @Override
-    public Completable moveAndCopy(@NonNull String targetDirectory, @NonNull List<DirectoryItem> itemsToMove, @NonNull List<DirectoryItem> itemsToCopy) {
+    public Completable createDirectory(@NonNull String rootDirectoryFullPath, @NonNull String newDirectoryName) {
+        return Completable.complete()
+                .delay(3500, TimeUnit.MILLISECONDS)
+                .subscribeOn(Schedulers.io());
+    }
+
+    @NonNull
+    @Override
+    public Completable moveAndCopy(@NonNull String targetDirectoryFullPath, @NonNull List<DirectoryItem> itemsToMove, @NonNull List<DirectoryItem> itemsToCopy) {
         return Completable.complete()
                 .delay(3500, TimeUnit.MILLISECONDS)
                 .subscribeOn(Schedulers.io());

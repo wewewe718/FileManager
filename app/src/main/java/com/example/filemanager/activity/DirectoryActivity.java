@@ -10,7 +10,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.annotation.StringRes;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -26,6 +25,7 @@ import com.example.filemanager.R;
 import com.example.filemanager.adapter.DirectoryItemsAdapter;
 import com.example.filemanager.databinding.ActivityDirectoryBinding;
 import com.example.filemanager.dialog.CopyDialog;
+import com.example.filemanager.dialog.CreateDirectoryDialogFragment;
 import com.example.filemanager.dialog.DeleteDirectoryItemDialogFragment;
 import com.example.filemanager.dialog.DirectoryItemInfoDialogFragment;
 import com.example.filemanager.dialog.RenameDirectoryItemDialogFragment;
@@ -40,7 +40,12 @@ import java.util.List;
 import io.reactivex.disposables.CompositeDisposable;
 
 public class DirectoryActivity extends AppCompatActivity implements
-        DirectoryItemsAdapter.Listener, DeleteDirectoryItemDialogFragment.Listener, RenameDirectoryItemDialogFragment.Listener, SortTypeDialogFragment.Listener {
+        DirectoryItemsAdapter.Listener,
+        SortTypeDialogFragment.Listener,
+        CreateDirectoryDialogFragment.Listener,
+        RenameDirectoryItemDialogFragment.Listener,
+        DeleteDirectoryItemDialogFragment.Listener
+{
     private static final String DIRECTORY_INTENT_KEY = "DIRECTORY_INTENT_KEY";
     private static final String SEARCH_VIEW_QUERY_KEY = "SEARCH_VIEW_QUERY_KEY";
 
@@ -106,12 +111,9 @@ public class DirectoryActivity extends AppCompatActivity implements
 
     @Override
     public void onBackPressed() {
-        // Close search view if opened
-        if (!searchView.isIconified()) {
-            searchView.setIconified(true);
+        if (closeSearchViewIfOpened()) {
             return;
         }
-
         viewModel.handleBackPressed();
     }
 
@@ -130,18 +132,18 @@ public class DirectoryActivity extends AppCompatActivity implements
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home: {
-                // Close search view if opened
-                if (!searchView.isIconified()) {
-                    searchView.setIconified(true);
+                if (closeSearchViewIfOpened()) {
                     return true;
                 }
-
                 viewModel.handleActionBarBackPressed();
-
                 break;
             }
             case R.id.item_sort: {
                 viewModel.handleChangeSortClicked();
+                break;
+            }
+            case R.id.item_create_directory: {
+                viewModel.handleCreateDirectoryClicked();
                 break;
             }
             default: {
@@ -189,7 +191,6 @@ public class DirectoryActivity extends AppCompatActivity implements
 
     @Override
     public void onItemSelectionChanged(boolean isInSelectMode) {
-        // TODO: Refactor action mode
         showActionModeVisible(isInSelectMode);
     }
 
@@ -197,6 +198,11 @@ public class DirectoryActivity extends AppCompatActivity implements
     @Override
     public void onSortTypeChanged() {
         viewModel.handleSortTypeChanged();
+    }
+
+    @Override
+    public void onCreateDirectory(@NonNull String directoryName) {
+        viewModel.handleCreateDirectoryConfirmed(directoryName);
     }
 
     @Override
@@ -283,6 +289,7 @@ public class DirectoryActivity extends AppCompatActivity implements
                 viewModel.isCopyDialogVisible.subscribe(this::showOrHideCopyDialog),
 
                 viewModel.showSortTypeDialogEvent.subscribe(u -> showSortTypeDialog()),
+                viewModel.showCreateDirectoryDialogEvent.subscribe(u -> showCreateDirectoryDialog()),
                 viewModel.showRenameItemDialogEvent.subscribe(this::showRenameDirectoryItemDialog),
                 viewModel.showDeleteItemDialogEvent.subscribe(this::showDeleteDirectoryItemDialog),
                 viewModel.showDeleteItemsDialogEvent.subscribe(this::showDeleteDirectoryItemsDialog),
@@ -373,6 +380,11 @@ public class DirectoryActivity extends AppCompatActivity implements
         dialog.show(getSupportFragmentManager(), "DirectoryItemInfoDialogFragment");
     }
 
+    private void showCreateDirectoryDialog() {
+        CreateDirectoryDialogFragment dialog = CreateDirectoryDialogFragment.newInstance();
+        dialog.show(getSupportFragmentManager(), "CreateDirectoryDialogFragment");
+    }
+
     private void showActionModeVisible(boolean isActionModeVisible) {
         if (isActionModeVisible && actionMode == null) {
             actionMode = startActionMode(actionModeCallback);
@@ -396,6 +408,15 @@ public class DirectoryActivity extends AppCompatActivity implements
 
     private void closeScreen() {
         finish();
+    }
+
+
+    private boolean closeSearchViewIfOpened() {
+        if (!searchView.isIconified()) {
+            searchView.setIconified(true);
+            return true;
+        }
+        return false;
     }
 
     private void restoreSearchView() {

@@ -14,7 +14,10 @@ public interface DirectoryRepository {
     Single<List<DirectoryItem>> getDirectoryContent(@NonNull String directory);
 
     @NonNull
-    Completable moveAndCopy(@NonNull String targetDirectory, @NonNull List<DirectoryItem> itemsToMove, @NonNull List<DirectoryItem> itemsToCopy);
+    Completable createDirectory(@NonNull String rootDirectoryFullPath, @NonNull String newDirectoryName);
+
+    @NonNull
+    Completable moveAndCopy(@NonNull String targetDirectoryFullPath, @NonNull List<DirectoryItem> itemsToMove, @NonNull List<DirectoryItem> itemsToCopy);
 
     @NonNull
     Completable rename(@NonNull String newName, @NonNull DirectoryItem item);

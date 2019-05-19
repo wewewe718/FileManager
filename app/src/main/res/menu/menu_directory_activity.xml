@@ -16,4 +16,9 @@
         android:icon="@drawable/ic_sort"
         app:showAsAction="ifRoom"
         />
+    <item
+        android:id="@+id/item_create_directory"
+        android:title="@string/create_directory"
+        app:showAsAction="never"
+        />
 </menu>
