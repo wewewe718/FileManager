@@ -13,6 +13,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.view.ActionMode;
 import android.view.Menu;
@@ -52,9 +53,12 @@ public class DirectoryActivity extends AppCompatActivity implements
     private CompositeDisposable viewModelDisposable = new CompositeDisposable();
     private DirectoryViewModel viewModel;
 
-    private DirectoryItemsAdapter adapter = new DirectoryItemsAdapter(this);
-    private CopyDialog copyDialog = new CopyDialog();
     private ActivityDirectoryBinding binding;
+
+    private DirectoryItemsAdapter adapter = new DirectoryItemsAdapter(this);
+    private LinearLayoutManager recyclerViewLayoutManager = new LinearLayoutManager(this);
+
+    private CopyDialog copyDialog = new CopyDialog();
 
     private SearchView searchView;
     private String searchQuery = "";
@@ -235,7 +239,7 @@ public class DirectoryActivity extends AppCompatActivity implements
     }
 
     private void initDirectoryItemsRecyclerView() {
-        binding.directoryContentRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        binding.directoryContentRecyclerView.setLayoutManager(recyclerViewLayoutManager);
         binding.directoryContentRecyclerView.setAdapter(adapter);
     }
 
@@ -321,6 +325,7 @@ public class DirectoryActivity extends AppCompatActivity implements
         binding.textViewEmptyDirectory.setVisibility(isEmpty ? View.VISIBLE : View.GONE);
 
         adapter.setData(directoryContent);
+        recyclerViewLayoutManager.scrollToPositionWithOffset(0, 0);
     }
 
     private void showSearchQuery(@NonNull String searchQuery) {

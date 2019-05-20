@@ -8,7 +8,15 @@
     <string name="quick_access_item_apps">Apps</string>
     <string name="quick_access_item_downloads">Downloads</string>
 
-    <string name="storage_item_storage_space_format_string">%1$d / %2$d GB</string>
+    <string name="file_size_in_bytes">%.2f B</string>
+    <string name="file_size_in_kb">%.2f KB</string>
+    <string name="file_size_in_mb">%.2f MB</string>
+    <string name="file_size_in_gb">%.2f GB</string>
+
+    <string name="file_sizes_in_bytes">%1$.2f / %2$.2f B</string>
+    <string name="file_sizes_in_kb">%1$.2f / %2$.2f KB</string>
+    <string name="file_sizes_in_mb">%1$.2f / %2$.2f MB</string>
+    <string name="file_sizes_in_gb">%1$.2f / %2$.2f GB</string>
 
     <string name="empty_directory">Empty directory</string>
     <string name="unable_to_open_file">Unable to open file</string>
@@ -57,8 +65,4 @@
 
     <string name="copy_dialog_title">Copy</string>
 
-    <string name="file_size_in_bytes">%.2f B</string>
-    <string name="file_size_in_kb">%.2f KB</string>
-    <string name="file_size_in_mb">%.2f MB</string>
-    <string name="file_size_in_gb">%.2f GB</string>
 </resources>

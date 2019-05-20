@@ -10,7 +10,6 @@ import android.support.v4.app.ActivityCompat;
 import android.text.TextUtils;
 
 import com.example.filemanager.model.StorageModel;
-import com.example.filemanager.model.StorageType;
 
 import java.io.File;
 import java.io.IOException;
@@ -112,8 +111,9 @@ public class FileSystemStorageRepository implements StorageRepository {
             }
         }
 
-        if (SDK_INT >= Build.VERSION_CODES.M && checkStoragePermission())
+        if (SDK_INT >= Build.VERSION_CODES.M && checkStoragePermission()) {
             result.clear();
+        }
 
         // Add all secondary storages
         if (!TextUtils.isEmpty(rawSecondaryStoragesStr)) {
@@ -164,8 +164,8 @@ public class FileSystemStorageRepository implements StorageRepository {
         return paths.toArray(new String[0]);
     }
 
-    private boolean canListFiles(File f) {
-        return f.canRead() && f.isDirectory();
+    private boolean canListFiles(File file) {
+        return file.canRead() && file.isDirectory();
     }
 
     private File getUsbDrive() {
@@ -198,11 +198,15 @@ public class FileSystemStorageRepository implements StorageRepository {
     @NonNull
     private StorageModel createStorageModelFromStoragePath(@NonNull String storagePath) {
         File file = new File(storagePath);
+
+        long totalSpace = file.getTotalSpace();
+        long freeSpace = file.getFreeSpace();
+        long usedSpace = totalSpace - freeSpace;
+
         return new StorageModel(
-                StorageType.INTERNAL_STORAGE,
                 storagePath,
-                file.getTotalSpace(),
-                file.getFreeSpace()
+                totalSpace,
+                usedSpace
         );
     }
 }

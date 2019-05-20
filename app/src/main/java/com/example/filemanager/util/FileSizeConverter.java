@@ -1,5 +1,6 @@
 package com.example.filemanager.util;
 
+import android.support.annotation.NonNull;
 import android.util.Pair;
 
 public class FileSizeConverter {
@@ -14,6 +15,7 @@ public class FileSizeConverter {
     private static final long ONE_MB = 1024 * ONE_KB;
     private static final long ONE_GB = 1024 * ONE_MB;
 
+    @NonNull
     public static Pair<FileSizeUnit, Double> convertFileSize(long fileSizeInBytes) {
         double sizeInBytes = (double) fileSizeInBytes;
 
@@ -33,5 +35,15 @@ public class FileSizeConverter {
         }
 
         return new Pair<>(FileSizeUnit.BYTE, sizeInBytes);
+    }
+
+    public static double convertFileSize(long fileSizeInBytes, @NonNull FileSizeUnit fileSizeUnit) {
+        double sizeInBytes = (double) fileSizeInBytes;
+        switch (fileSizeUnit) {
+            case KILOBYTE: return sizeInBytes / ONE_KB;
+            case MEGABYTE: return sizeInBytes / ONE_KB;
+            case GIGABYTE: return sizeInBytes / ONE_GB;
+            default: return sizeInBytes;
+        }
     }
 }

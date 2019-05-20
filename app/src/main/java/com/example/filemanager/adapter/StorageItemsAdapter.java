@@ -1,19 +1,20 @@
 package com.example.filemanager.adapter;
 
-import android.content.res.Resources;
 import android.databinding.DataBindingUtil;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
 import com.example.filemanager.R;
 import com.example.filemanager.databinding.ItemStorageBinding;
 import com.example.filemanager.model.StorageModel;
+import com.example.filemanager.util.FileSizeConverter;
+import com.example.filemanager.util.FileSizeFormatUtil;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 
 
 public class StorageItemsAdapter extends RecyclerView.Adapter<StorageItemsAdapter.ViewHolder> {
@@ -67,7 +68,6 @@ public class StorageItemsAdapter extends RecyclerView.Adapter<StorageItemsAdapte
         }
 
         private void bind(@NonNull StorageModel model) {
-            showStorageTypeImage(model);
             showStorageName(model);
             showStorageSpaceInTextView(model);
             showStorageSpaceInProgressBar(model);
@@ -75,37 +75,31 @@ public class StorageItemsAdapter extends RecyclerView.Adapter<StorageItemsAdapte
             itemView.setOnClickListener(v -> listener.onStorageClicked(model));
         }
 
-        private void showStorageTypeImage(@NonNull StorageModel model) {
-            int storageTypeImageId = -1;
-
-            switch (model.getType()) {
-                case INTERNAL_STORAGE: {
-                    storageTypeImageId = R.drawable.ic_internal_storage;
-                    break;
-                }
-                case EXTERNAL_STORAGE: {
-                    storageTypeImageId = R.drawable.ic_external_storage;
-                    break;
-                }
-            }
-
-            binding.storageTypeImageView.setBackgroundResource(storageTypeImageId);
-        }
-
         private void showStorageName(@NonNull StorageModel model) {
-            binding.storageTypeTextView.setText(model.getName());
+            binding.storageTypeTextView.setText(model.getPath());
         }
 
         private void showStorageSpaceInTextView(@NonNull StorageModel model) {
-            Resources resources = binding.getRoot().getResources();
-            String storageSpaceFormatString = resources.getString(R.string.storage_item_storage_space_format_string);
-            String storageSpace = String.format(Locale.ENGLISH, storageSpaceFormatString, model.getFreeSpace(), model.getTotalSpace());
-            binding.storageSpaceTextView.setText(storageSpace);
+            long totalSpace = model.getTotalSpace();
+            long usedSpace = model.getUsedSpace();
+
+            String formattedString = FileSizeFormatUtil.formatTwoFileSizes(
+                    binding.getRoot().getContext(),
+                    usedSpace,
+                    totalSpace
+            );
+            binding.storageSpaceTextView.setText(formattedString);
         }
 
         private void showStorageSpaceInProgressBar(@NonNull StorageModel model) {
-            binding.storageSpaceProgressBar.setMax((int) model.getTotalSpace());
-            binding.storageSpaceProgressBar.setProgress((int) model.getFreeSpace());
+            Pair<FileSizeConverter.FileSizeUnit, Double> result = FileSizeConverter.convertFileSize(model.getUsedSpace());
+            double usedSpace = result.second;
+
+            FileSizeConverter.FileSizeUnit fileSizeUnit = result.first;
+            double totalSpace = FileSizeConverter.convertFileSize(model.getTotalSpace(), fileSizeUnit);
+
+            binding.storageSpaceProgressBar.setMax((int) totalSpace);
+            binding.storageSpaceProgressBar.setProgress((int) usedSpace);
         }
     }
 }

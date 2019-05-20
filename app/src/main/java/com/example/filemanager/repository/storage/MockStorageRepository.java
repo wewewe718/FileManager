@@ -3,7 +3,6 @@ package com.example.filemanager.repository.storage;
 import android.support.annotation.NonNull;
 
 import com.example.filemanager.model.StorageModel;
-import com.example.filemanager.model.StorageType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,8 +15,8 @@ public class MockStorageRepository implements StorageRepository {
     private List<StorageModel> storageModelList = new ArrayList<>();
 
     public MockStorageRepository() {
-        storageModelList.add(new StorageModel(StorageType.INTERNAL_STORAGE, "Internal storage", 9, 7));
-        storageModelList.add(new StorageModel(StorageType.EXTERNAL_STORAGE, "External storage", 19, 2));
+        storageModelList.add(new StorageModel("Internal storage", 9, 7));
+        storageModelList.add(new StorageModel("External storage", 19, 2));
     }
 
     @Override

@@ -3,33 +3,26 @@ package com.example.filemanager.model;
 import android.support.annotation.NonNull;
 
 public class StorageModel {
-    private StorageType type;
-    private String name;
+    private String path;
     private long totalSpace;
-    private long freeSpace;
+    private long usedSpace;
 
-    public StorageModel(@NonNull StorageType type, @NonNull String name, long totalSpace, long freeSpace) {
-        this.type = type;
-        this.name = name;
+    public StorageModel(@NonNull String path, long totalSpace, long usedSpace) {
+        this.path = path;
         this.totalSpace = totalSpace;
-        this.freeSpace = freeSpace;
+        this.usedSpace = usedSpace;
     }
 
     @NonNull
-    public StorageType getType() {
-        return type;
-    }
-
-    @NonNull
-    public String getName() {
-        return name;
+    public String getPath() {
+        return path;
     }
 
     public long getTotalSpace() {
         return totalSpace;
     }
 
-    public long getFreeSpace() {
-        return freeSpace;
+    public long getUsedSpace() {
+        return usedSpace;
     }
 }

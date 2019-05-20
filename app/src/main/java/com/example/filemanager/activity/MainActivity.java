@@ -130,6 +130,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showStorageDirectoryActivity(@NonNull StorageModel storageModel) {
-        DirectoryActivity.start(this, storageModel.getName());
+        DirectoryActivity.start(this, storageModel.getPath());
     }
 }
