@@ -52,7 +52,11 @@ public class SortDirectoryItemsUtil {
     private static class TypeComparator implements Comparator<DirectoryItem> {
         @Override
         public int compare(DirectoryItem o1, DirectoryItem o2) {
-            return o1.getType().toInt() - o2.getType().toInt();
+            int result = o1.getType().toInt() - o2.getType().toInt();
+            if (result != 0) {
+                return result;
+            }
+            return o1.getName().compareTo(o2.getName());
         }
     }
 

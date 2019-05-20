@@ -5,14 +5,14 @@ import android.support.annotation.NonNull;
 public class StorageModel {
     private StorageType type;
     private String name;
-    private double totalSpace;
-    private double usedSpace;
+    private long totalSpace;
+    private long freeSpace;
 
-    public StorageModel(@NonNull StorageType type, @NonNull String name, double totalSpace, double usedSpace) {
+    public StorageModel(@NonNull StorageType type, @NonNull String name, long totalSpace, long freeSpace) {
         this.type = type;
         this.name = name;
         this.totalSpace = totalSpace;
-        this.usedSpace = usedSpace;
+        this.freeSpace = freeSpace;
     }
 
     @NonNull
@@ -25,11 +25,11 @@ public class StorageModel {
         return name;
     }
 
-    public double getTotalSpace() {
+    public long getTotalSpace() {
         return totalSpace;
     }
 
-    public double getUsedSpace() {
-        return usedSpace;
+    public long getFreeSpace() {
+        return freeSpace;
     }
 }

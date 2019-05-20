@@ -4,28 +4,29 @@ import android.app.Application;
 import android.support.annotation.NonNull;
 
 import com.example.filemanager.repository.directory.DirectoryRepository;
-import com.example.filemanager.repository.directory.MockDirectoryRepository;
+import com.example.filemanager.repository.directory.FileSystemDirectoryRepository;
 import com.example.filemanager.repository.settings.SettingsRepository;
 import com.example.filemanager.repository.settings.SharedPreferencesSettingsRepository;
-import com.example.filemanager.repository.storage.MockStorageListRepository;
-import com.example.filemanager.repository.storage.StorageListRepository;
+import com.example.filemanager.repository.storage.FileSystemStorageRepository;
+import com.example.filemanager.repository.storage.MockStorageRepository;
+import com.example.filemanager.repository.storage.StorageRepository;
 
 public class App extends Application {
-    private StorageListRepository storageListRepository;
+    private StorageRepository storageRepository;
     private DirectoryRepository directoryRepository;
     private SettingsRepository settingsRepository;
 
     @Override
     public void onCreate() {
         super.onCreate();
-        storageListRepository = new MockStorageListRepository();
-        directoryRepository = new MockDirectoryRepository();
+        storageRepository = new FileSystemStorageRepository(this);
+        directoryRepository = new FileSystemDirectoryRepository();
         settingsRepository = new SharedPreferencesSettingsRepository(this);
     }
 
     @NonNull
-    public StorageListRepository getStorageListRepository() {
-        return storageListRepository;
+    public StorageRepository getStorageRepository() {
+        return storageRepository;
     }
 
     @NonNull

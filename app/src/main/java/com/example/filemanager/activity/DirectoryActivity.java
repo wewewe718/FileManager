@@ -318,16 +318,9 @@ public class DirectoryActivity extends AppCompatActivity implements
 
     private void showDirectoryContent(@NonNull List<DirectoryItem> directoryContent) {
         boolean isEmpty = directoryContent.isEmpty();
-        showDirectoryIsEmpty(isEmpty);
-
-        if (!isEmpty) {
-            adapter.setData(directoryContent);
-        }
-    }
-
-    private void showDirectoryIsEmpty(boolean isEmpty) {
         binding.textViewEmptyDirectory.setVisibility(isEmpty ? View.VISIBLE : View.GONE);
-        binding.directoryContentRecyclerView.setVisibility(isEmpty ? View.GONE : View.VISIBLE);
+
+        adapter.setData(directoryContent);
     }
 
     private void showSearchQuery(@NonNull String searchQuery) {

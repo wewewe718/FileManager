@@ -1,5 +1,6 @@
 package com.example.filemanager.adapter;
 
+import android.content.res.Resources;
 import android.databinding.DataBindingUtil;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
@@ -96,14 +97,15 @@ public class StorageItemsAdapter extends RecyclerView.Adapter<StorageItemsAdapte
         }
 
         private void showStorageSpaceInTextView(@NonNull StorageModel model) {
-            String storageSpaceFormatString = binding.getRoot().getResources().getString(R.string.storage_item_storage_space_format_string);
-            String storageSpace = String.format(Locale.ENGLISH, storageSpaceFormatString, model.getUsedSpace(), model.getTotalSpace());
+            Resources resources = binding.getRoot().getResources();
+            String storageSpaceFormatString = resources.getString(R.string.storage_item_storage_space_format_string);
+            String storageSpace = String.format(Locale.ENGLISH, storageSpaceFormatString, model.getFreeSpace(), model.getTotalSpace());
             binding.storageSpaceTextView.setText(storageSpace);
         }
 
         private void showStorageSpaceInProgressBar(@NonNull StorageModel model) {
             binding.storageSpaceProgressBar.setMax((int) model.getTotalSpace());
-            binding.storageSpaceProgressBar.setProgress((int) model.getUsedSpace());
+            binding.storageSpaceProgressBar.setProgress((int) model.getFreeSpace());
         }
     }
 }

@@ -5,34 +5,35 @@ import android.arch.lifecycle.ViewModelProvider;
 import android.support.annotation.NonNull;
 
 import com.example.filemanager.model.StorageModel;
-import com.example.filemanager.repository.storage.MockStorageListRepository;
-import com.example.filemanager.repository.storage.StorageListRepository;
+import com.example.filemanager.repository.storage.StorageRepository;
 
 import java.util.List;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 import io.reactivex.subjects.BehaviorSubject;
 import io.reactivex.subjects.Subject;
 
 public class StorageListViewModel extends ViewModel {
-    private StorageListRepository storageListRepository;
+    private StorageRepository storageRepository;
     private CompositeDisposable disposable = new CompositeDisposable();
 
     public Subject<Boolean> isLoading = BehaviorSubject.createDefault(true);
     public Subject<List<StorageModel>> storageList = BehaviorSubject.create();
 
-    public StorageListViewModel(@NonNull StorageListRepository storageListRepository) {
-        this.storageListRepository = storageListRepository;
+    public StorageListViewModel(@NonNull StorageRepository storageRepository) {
+        this.storageRepository = storageRepository;
         loadStorageList();
     }
 
     private void loadStorageList() {
         isLoading.onNext(true);
 
-        Disposable subscription = storageListRepository
+        Disposable subscription = storageRepository
                 .getStorageList()
+                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         result -> {
@@ -56,16 +57,16 @@ public class StorageListViewModel extends ViewModel {
 
 
     public static class Factory implements ViewModelProvider.Factory {
-        private StorageListRepository storageListRepository;
+        private StorageRepository storageRepository;
 
-        public Factory(@NonNull StorageListRepository storageListRepository) {
-            this.storageListRepository = storageListRepository;
+        public Factory(@NonNull StorageRepository storageRepository) {
+            this.storageRepository = storageRepository;
         }
 
         @NonNull
         @Override
         public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-            return (T) new StorageListViewModel(storageListRepository);
+            return (T) new StorageListViewModel(storageRepository);
         }
     }
 }

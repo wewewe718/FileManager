@@ -5,7 +5,7 @@ import com.example.filemanager.model.StorageModel;
 import java.util.List;
 import io.reactivex.Single;
 
-public interface StorageListRepository {
+public interface StorageRepository {
     @NonNull
     Single<List<StorageModel>> getStorageList();
 }

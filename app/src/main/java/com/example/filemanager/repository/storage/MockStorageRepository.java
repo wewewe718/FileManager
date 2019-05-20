@@ -12,10 +12,10 @@ import java.util.concurrent.TimeUnit;
 import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
 
-public class MockStorageListRepository implements StorageListRepository {
+public class MockStorageRepository implements StorageRepository {
     private List<StorageModel> storageModelList = new ArrayList<>();
 
-    public MockStorageListRepository() {
+    public MockStorageRepository() {
         storageModelList.add(new StorageModel(StorageType.INTERNAL_STORAGE, "Internal storage", 9, 7));
         storageModelList.add(new StorageModel(StorageType.EXTERNAL_STORAGE, "External storage", 19, 2));
     }

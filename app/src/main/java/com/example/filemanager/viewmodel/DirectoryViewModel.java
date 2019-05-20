@@ -247,6 +247,7 @@ public class DirectoryViewModel extends ViewModel {
         String currentDirectory = directories.peek();
         Disposable subscription = directoryRepository
                 .createDirectory(currentDirectory, newDirectoryName)
+                .subscribeOn(Schedulers.io())
                 .subscribe(
                         this::refreshCurrentDirectory,
                         error -> {
@@ -324,6 +325,7 @@ public class DirectoryViewModel extends ViewModel {
         Disposable subscription = directoryRepository
                 .getDirectoryContent(directory)
                 .map(this::sortDirectoryItems)
+                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         result -> {

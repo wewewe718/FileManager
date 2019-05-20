@@ -1,14 +1,15 @@
 package com.example.filemanager.activity;
 
+import android.Manifest;
 import android.arch.lifecycle.ViewModelProvider;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.res.Configuration;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
+import android.util.Pair;
 import android.view.View;
 
 import com.example.App;
@@ -17,16 +18,18 @@ import com.example.filemanager.adapter.QuickAccessItemsAdapter;
 import com.example.filemanager.adapter.StorageItemsAdapter;
 import com.example.filemanager.databinding.ActivityMainBinding;
 import com.example.filemanager.model.StorageModel;
-import com.example.filemanager.repository.storage.StorageListRepository;
+import com.example.filemanager.repository.storage.StorageRepository;
+import com.example.filemanager.util.PermissionsUtil;
 import com.example.filemanager.viewmodel.StorageListViewModel;
 
 import java.util.List;
 
-import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.disposables.Disposable;
 
 public class MainActivity extends AppCompatActivity {
+    private static final int PERMISSION_REQUEST_CODE = 101;
+    private static final String[] PERMISSIONS = { Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE };
+
     private CompositeDisposable viewModelDisposable = new CompositeDisposable();
     private StorageItemsAdapter adapter = new StorageItemsAdapter(this::showStorageDirectoryActivity);
     private StorageListViewModel viewModel;
@@ -38,6 +41,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
+
+        requestPermissions();
 
         initQuickAccessItemsView();
         initStorageItemsRecyclerView();
@@ -58,6 +63,19 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    private void requestPermissions() {
+        PermissionsUtil.requestPermissions(this, PERMISSIONS, PERMISSION_REQUEST_CODE);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        Pair<List<String>, List<String>> result = PermissionsUtil.handlePermissionsResult(requestCode, permissions, grantResults, PERMISSION_REQUEST_CODE);
+        List<String> notGrantedPermissions = result.second;
+        if (!notGrantedPermissions.isEmpty()) {
+            finish();
+        }
+    }
+
     private void initQuickAccessItemsView() {
         int columnNumber = 3;
         int orientation = getResources().getConfiguration().orientation;
@@ -77,8 +95,8 @@ public class MainActivity extends AppCompatActivity {
 
     private void createViewModel() {
         App app = (App) getApplication();
-        StorageListRepository storageListRepository = app.getStorageListRepository();
-        ViewModelProvider.Factory viewModelFactory = new StorageListViewModel.Factory(storageListRepository);
+        StorageRepository storageRepository = app.getStorageRepository();
+        ViewModelProvider.Factory viewModelFactory = new StorageListViewModel.Factory(storageRepository);
 
         viewModel = ViewModelProviders
                 .of(this, viewModelFactory)
@@ -112,6 +130,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showStorageDirectoryActivity(@NonNull StorageModel storageModel) {
-        DirectoryActivity.start(this, "/test");
+        DirectoryActivity.start(this, storageModel.getName());
     }
 }
