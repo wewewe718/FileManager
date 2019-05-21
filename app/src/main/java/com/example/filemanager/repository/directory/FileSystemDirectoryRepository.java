@@ -4,17 +4,19 @@ import android.support.annotation.NonNull;
 
 import com.example.filemanager.model.DirectoryItem;
 import com.example.filemanager.model.DirectoryItemType;
+import com.example.filemanager.util.DirectoryItemTypeUtil;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 import io.reactivex.Completable;
 import io.reactivex.Single;
 
 public class FileSystemDirectoryRepository implements DirectoryRepository {
+    private static final String FILE_PATH_SEPARATOR = File.separator;
+
     @NonNull
     @Override
     public Single<List<DirectoryItem>> getDirectoryContent(@NonNull String directory) {
@@ -50,19 +52,40 @@ public class FileSystemDirectoryRepository implements DirectoryRepository {
     @NonNull
     @Override
     public Completable rename(@NonNull String newName, @NonNull DirectoryItem item) {
-        return null;
+        return Completable.create(emitter -> {
+           try {
+               tryRename(newName, item);
+               emitter.onComplete();
+           } catch (Exception ex) {
+             emitter.tryOnError(ex);
+           }
+        });
     }
 
     @NonNull
     @Override
     public Completable delete(@NonNull DirectoryItem item) {
-        return null;
+        return Completable.create(emitter -> {
+            try {
+                tryDelete(item);
+                emitter.onComplete();
+            } catch (Exception ex) {
+                emitter.onError(ex);
+            }
+        });
     }
 
     @NonNull
     @Override
-    public Completable delete(@NonNull List<DirectoryItem> item) {
-        return null;
+    public Completable delete(@NonNull List<DirectoryItem> items) {
+        return Completable.create(emitter -> {
+            try {
+                tryDelete(items);
+                emitter.onComplete();
+            } catch (Exception ex) {
+                emitter.onError(ex);
+            }
+        });
     }
 
 
@@ -85,32 +108,80 @@ public class FileSystemDirectoryRepository implements DirectoryRepository {
     }
 
     private void tryCreateDirectory(@NonNull String rootDirectoryFullPath, @NonNull String newDirectoryName) {
-        String newDirectoryPath = String.format(Locale.ENGLISH, "%s%s%s", rootDirectoryFullPath, File.separator, newDirectoryName);
+        String newDirectoryPath = rootDirectoryFullPath + FILE_PATH_SEPARATOR + newDirectoryName;
         File dir = new File(newDirectoryPath);
+        if (dir.exists()) {
+            throw new IllegalStateException("Directory already exists");
+        }
+
         boolean isDirectoryCreated = dir.mkdir();
         if (!isDirectoryCreated) {
             throw new IllegalStateException("Unable to create directory");
         }
     }
 
+    private void tryRename(@NonNull String newName, @NonNull DirectoryItem item) {
+        File file = new File(item.getFilePath());
+
+        String newFileName = file.getParent() + FILE_PATH_SEPARATOR + newName;
+        File newFile = new File(newFileName);
+        if (newFile.exists()) {
+            throw new IllegalStateException("File already exists");
+        }
+
+        boolean isFileRenamed = file.renameTo(new File(newFileName));
+        if (!isFileRenamed) {
+            throw new IllegalStateException("Unable to rename file");
+        }
+    }
+
+    private void tryDelete(@NonNull List<DirectoryItem> items) throws Exception {
+        Exception lastError = null;
+
+        for (DirectoryItem item : items) {
+            try {
+                tryDelete(item);
+            } catch (Exception ex) {
+                lastError = ex;
+            }
+        }
+
+        if (lastError != null) {
+            throw lastError;
+        }
+    }
+
+    private void tryDelete(@NonNull DirectoryItem item) {
+        File file = new File(item.getFilePath());
+        if (!file.exists()) {
+            throw new IllegalStateException("File does not exist");
+        }
+
+        boolean isFileDeleted = file.delete();
+        if (!isFileDeleted) {
+            throw new IllegalStateException("Unable to delete file");
+        }
+    }
+
+
     @NonNull
     private DirectoryItem createDirectoryItemFromFile(@NonNull File file) {
         return new DirectoryItem(
-                createDirectoryItemTypeFromFile(file),
+                getDirectoryItemType(file),
                 file.getName(),
                 file.getPath(),
-                new Date(file.lastModified()),
+                getLastModifiedDate(file),
                 file.length()
         );
     }
 
     @NonNull
-    private DirectoryItemType createDirectoryItemTypeFromFile(@NonNull File file) {
-        // TODO: Support other types
-        if (file.isDirectory()) {
-            return DirectoryItemType.DIRECTORY;
-        } else {
-            return DirectoryItemType.OTHER;
-        }
+    private DirectoryItemType getDirectoryItemType(@NonNull File file) {
+        return DirectoryItemTypeUtil.getDirectoryItemType(file);
+    }
+
+    @NonNull
+    private Date getLastModifiedDate(@NonNull File file) {
+        return new Date(file.lastModified());
     }
 }

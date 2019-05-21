@@ -121,6 +121,7 @@ public class DirectoryViewModel extends ViewModel {
 
         Disposable subscription = directoryRepository
                 .moveAndCopy(currentDirectory, itemsToMove, itemsToCopy)
+                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         () -> {
@@ -146,6 +147,7 @@ public class DirectoryViewModel extends ViewModel {
 
         Disposable subscription = directoryRepository
                 .rename(newName, item)
+                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         this::refreshCurrentDirectory,
@@ -171,6 +173,7 @@ public class DirectoryViewModel extends ViewModel {
 
         Disposable subscription = directoryRepository
                 .delete(item)
+                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         this::refreshCurrentDirectory,
@@ -188,6 +191,7 @@ public class DirectoryViewModel extends ViewModel {
 
         Disposable subscription = directoryRepository
                 .delete(items)
+                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         this::refreshCurrentDirectory,

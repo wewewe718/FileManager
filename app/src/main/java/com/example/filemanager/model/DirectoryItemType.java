@@ -6,6 +6,7 @@ public enum  DirectoryItemType {
     AUDIO,
     VIDEO,
     TEXT,
+    ARCHIVE,
     OTHER;
 
     public int toInt() {
