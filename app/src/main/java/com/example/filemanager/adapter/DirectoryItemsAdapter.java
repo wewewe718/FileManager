@@ -79,7 +79,7 @@ public class DirectoryItemsAdapter extends RecyclerView.Adapter<DirectoryItemsAd
 
     @NonNull
     public List<DirectoryItem> getSelectedItems() {
-        return selectedItems;
+        return new ArrayList<>(selectedItems);
     }
 
 

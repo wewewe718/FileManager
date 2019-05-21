@@ -223,8 +223,8 @@ public class DirectoryActivity extends AppCompatActivity implements
     @Override
     public void onDeleteDirectoryItems() {
         List<DirectoryItem> selectedItems = adapter.getSelectedItems();
-        viewModel.handleDeleteConfirmed(selectedItems);
         showActionModeVisible(false);
+        viewModel.handleDeleteConfirmed(selectedItems);
     }
 
 

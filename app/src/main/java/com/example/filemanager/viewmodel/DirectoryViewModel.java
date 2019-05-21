@@ -252,6 +252,7 @@ public class DirectoryViewModel extends ViewModel {
         Disposable subscription = directoryRepository
                 .createDirectory(currentDirectory, newDirectoryName)
                 .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         this::refreshCurrentDirectory,
                         error -> {

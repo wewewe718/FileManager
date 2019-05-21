@@ -152,11 +152,35 @@ public class FileSystemDirectoryRepository implements DirectoryRepository {
     }
 
     private void tryDelete(@NonNull DirectoryItem item) {
-        File file = new File(item.getFilePath());
-        if (!file.exists()) {
+        File fileOrDirectory = new File(item.getFilePath());
+        tryDeleteFileOrDirectory(fileOrDirectory);
+    }
+
+    private void tryDeleteFileOrDirectory(@NonNull File fileOrDirectory) {
+        if (!fileOrDirectory.exists()) {
             throw new IllegalStateException("File does not exist");
         }
 
+        if (fileOrDirectory.isDirectory()) {
+            tryDeleteDirectory(fileOrDirectory);
+        } else {
+            tryDeleteFile(fileOrDirectory);
+        }
+    }
+
+    private void tryDeleteDirectory(@NonNull File directory) {
+        File[] files = directory.listFiles();
+        for (File fileOrDirectory : files) {
+            tryDeleteFileOrDirectory(fileOrDirectory);
+        }
+
+        boolean isDirectoryDeleted = directory.delete();
+        if (!isDirectoryDeleted) {
+            throw new IllegalStateException("Unable to delete directory");
+        }
+    }
+
+    private void tryDeleteFile(@NonNull File file) {
         boolean isFileDeleted = file.delete();
         if (!isFileDeleted) {
             throw new IllegalStateException("Unable to delete file");

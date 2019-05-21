@@ -67,7 +67,7 @@ public class FileSystemStorageRepository implements StorageRepository {
         String rawExternalStorage = System.getenv("EXTERNAL_STORAGE");
 
         // All Secondary SD-CARDs (all exclude primary) separated by ":"
-        String rawSecondaryStoragesStr = System.getenv("SECONDARY_STORAGE");
+        String rawSecondaryStorages = System.getenv("SECONDARY_STORAGE");
 
         // Primary emulated SD-CARD
         String rawEmulatedStorageTarget = System.getenv("EMULATED_STORAGE_TARGET");
@@ -116,17 +116,18 @@ public class FileSystemStorageRepository implements StorageRepository {
         }
 
         // Add all secondary storages
-        if (!TextUtils.isEmpty(rawSecondaryStoragesStr)) {
+        if (!TextUtils.isEmpty(rawSecondaryStorages)) {
             // All Secondary SD-CARDs splited into array
-            String[] rawSecondaryStorages = rawSecondaryStoragesStr.split(File.pathSeparator);
-            Collections.addAll(result, rawSecondaryStorages);
+            String[] storages = rawSecondaryStorages.split(File.pathSeparator);
+            Collections.addAll(result, storages);
         }
 
-        String strings[] = getExtSdCardPaths();
-        for (String s : strings) {
-            File f = new File(s);
-            if (!result.contains(s) && canListFiles(f))
-                result.add(s);
+        String externalSdCardPaths[] = getExternalSdCardPaths();
+        for (String path : externalSdCardPaths) {
+            File file = new File(path);
+            if (!result.contains(path) && canListFiles(file)) {
+                result.add(path);
+            }
         }
 
         File usb = getUsbDrive();
@@ -142,8 +143,9 @@ public class FileSystemStorageRepository implements StorageRepository {
         return result;
     }
 
-    private String[] getExtSdCardPaths() {
+    private String[] getExternalSdCardPaths() {
         List<String> paths = new ArrayList<>();
+
         for (File file : context.getExternalFilesDirs("external")) {
             if (file != null) {
                 int index = file.getAbsolutePath().lastIndexOf("/Android/data");
@@ -160,7 +162,11 @@ public class FileSystemStorageRepository implements StorageRepository {
                 }
             }
         }
-        if (paths.isEmpty()) paths.add("/storage/sdcard1");
+
+        if (paths.isEmpty()) {
+            paths.add("/storage/sdcard1");
+        }
+
         return paths.toArray(new String[0]);
     }
 
@@ -172,25 +178,28 @@ public class FileSystemStorageRepository implements StorageRepository {
         File parent = new File("/storage");
 
         try {
-            for (File f : parent.listFiles())
-                if (f.exists() && f.getName().toLowerCase().contains("usb") && f.canExecute())
-                    return f;
+            for (File file : parent.listFiles()) {
+                if (file.exists() && file.getName().toLowerCase().contains("usb") && file.canExecute()) {
+                    return file;
+                }
+            }
         } catch (Exception ignore) {
         }
 
         parent = new File("/mnt/sdcard/usbStorage");
-        if (parent.exists() && parent.canExecute())
+        if (parent.exists() && parent.canExecute()) {
             return parent;
+        }
 
         parent = new File("/mnt/sdcard/usb_storage");
-        if (parent.exists() && parent.canExecute())
+        if (parent.exists() && parent.canExecute()) {
             return parent;
+        }
 
         return null;
     }
 
-    public boolean checkStoragePermission() {
-        // Verify that all required contact permissions have been granted.
+    private boolean checkStoragePermission() {
         return ActivityCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 == PackageManager.PERMISSION_GRANTED;
     }
