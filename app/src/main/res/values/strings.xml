@@ -1,11 +1,11 @@
 <resources>
     <string name="app_name">File Manager</string>
-    
-    <string name="quick_access_item_images">Images</string>
+
     <string name="quick_access_item_audio">Audio</string>
     <string name="quick_access_item_video">Video</string>
     <string name="quick_access_item_documents">Documents</string>
-    <string name="quick_access_item_apps">Apps</string>
+    <string name="quick_access_item_camera">Camera</string>
+    <string name="quick_access_item_images">Images</string>
     <string name="quick_access_item_downloads">Downloads</string>
 
     <string name="file_size_in_bytes">%.2f B</string>

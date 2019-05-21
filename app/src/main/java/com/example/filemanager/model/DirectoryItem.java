@@ -3,19 +3,22 @@ package com.example.filemanager.model;
 import android.support.annotation.NonNull;
 
 import java.io.Serializable;
+import java.net.URI;
 import java.util.Date;
 
 public class DirectoryItem implements Serializable {
     private DirectoryItemType type;
     private String name;
     private String filePath;
+    private String uri;
     private Date lastModificationDate;
     private long fileSizeInBytes;
 
-    public DirectoryItem(@NonNull DirectoryItemType type, @NonNull String name, @NonNull String filePath, @NonNull Date lastModificationDate, long fileSizeInBytes) {
+    public DirectoryItem(@NonNull DirectoryItemType type, @NonNull String name, @NonNull String filePath, @NonNull String uri, @NonNull Date lastModificationDate, long fileSizeInBytes) {
         this.type = type;
         this.name = name;
         this.filePath = filePath;
+        this.uri = uri;
         this.lastModificationDate = lastModificationDate;
         this.fileSizeInBytes = fileSizeInBytes;
     }
@@ -33,6 +36,11 @@ public class DirectoryItem implements Serializable {
     @NonNull
     public String getFilePath() {
         return filePath;
+    }
+
+    @NonNull
+    public String getUri() {
+        return uri;
     }
 
     @NonNull

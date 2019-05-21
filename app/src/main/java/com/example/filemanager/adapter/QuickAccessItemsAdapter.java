@@ -2,6 +2,7 @@ package com.example.filemanager.adapter;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -34,23 +35,47 @@ public class QuickAccessItemsAdapter extends BaseAdapter {
     private LayoutInflater layoutInflater;
     private Listener listener;
     private QuickAccessItemViewModel[] data = {
-            // Images item
-            new QuickAccessItemViewModel(R.drawable.ic_image, R.string.quick_access_item_images, "/test"),
-
             // Audio item
-            new QuickAccessItemViewModel(R.drawable.ic_audio, R.string.quick_access_item_audio, "/test"),
+            new QuickAccessItemViewModel(
+                    R.drawable.ic_audio,
+                    R.string.quick_access_item_audio,
+                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC).getPath()
+            ),
 
             // Video item
-            new QuickAccessItemViewModel(R.drawable.ic_video, R.string.quick_access_item_video, "/test"),
+            new QuickAccessItemViewModel(
+                    R.drawable.ic_video,
+                    R.string.quick_access_item_video,
+                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES).getPath()
+            ),
 
             // Documents item
-            new QuickAccessItemViewModel(R.drawable.ic_document, R.string.quick_access_item_documents, "/test"),
+            new QuickAccessItemViewModel(
+                    R.drawable.ic_document,
+                    R.string.quick_access_item_documents,
+                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS).getPath()
+            ),
 
-            // Apps item
-            new QuickAccessItemViewModel(R.drawable.ic_app, R.string.quick_access_item_apps, "/test"),
+            // Camera item
+            new QuickAccessItemViewModel(
+                    R.drawable.ic_camera,
+                    R.string.quick_access_item_camera,
+                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).getPath()
+            ),
+
+            // Images item
+            new QuickAccessItemViewModel(
+                    R.drawable.ic_image,
+                    R.string.quick_access_item_images,
+                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getPath()
+            ),
 
             // Downloads item
-            new QuickAccessItemViewModel(R.drawable.ic_downloads, R.string.quick_access_item_downloads, "/test")
+            new QuickAccessItemViewModel(
+                    R.drawable.ic_downloads,
+                    R.string.quick_access_item_downloads,
+                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath()
+            )
     };
 
 

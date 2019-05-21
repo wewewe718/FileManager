@@ -34,6 +34,7 @@ import com.example.filemanager.dialog.SortTypeDialogFragment;
 import com.example.filemanager.model.DirectoryItem;
 import com.example.filemanager.repository.directory.DirectoryRepository;
 import com.example.filemanager.repository.settings.SettingsRepository;
+import com.example.filemanager.util.MimeTypeUtil;
 import com.example.filemanager.viewmodel.DirectoryViewModel;
 
 import java.util.List;
@@ -396,7 +397,13 @@ public class DirectoryActivity extends AppCompatActivity implements
     }
 
     private void openFile(@NonNull DirectoryItem item) {
-        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(item.getFilePath()));
+        Uri uri = Uri.parse(item.getUri());
+        String mimeType = MimeTypeUtil.getMimeType(item);
+
+        Intent intent = new Intent();
+        intent.setAction(Intent.ACTION_VIEW);
+        intent.setDataAndType(uri, mimeType);
+
         if (intent.resolveActivity(getPackageManager()) == null) {
             Toast.makeText(this, R.string.unable_to_open_file, Toast.LENGTH_LONG).show();
         } else {

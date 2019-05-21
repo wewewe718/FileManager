@@ -67,12 +67,12 @@ public class MockDirectoryRepository implements DirectoryRepository {
     @NonNull
     private List<DirectoryItem> createMockDirectoryItemList(@NonNull String directory) {
         List<DirectoryItem> directoryItems = new ArrayList<>();
-        directoryItems.add(new DirectoryItem(DirectoryItemType.DIRECTORY, "directory", directory + "/child", new Date(), 0));
-        directoryItems.add(new DirectoryItem(DirectoryItemType.IMAGE, "picture", "", new Date(), 10));
-        directoryItems.add(new DirectoryItem(DirectoryItemType.AUDIO, "audio", "", new Date(), 20 * 1024));
-        directoryItems.add(new DirectoryItem(DirectoryItemType.VIDEO, "video", "", new Date(), 30 * 1024 * 1024));
-        directoryItems.add(new DirectoryItem(DirectoryItemType.TEXT, "text", "", new Date(), 40L * 1024 * 1024 * 1024));
-        directoryItems.add(new DirectoryItem(DirectoryItemType.OTHER, "other", "", new Date(), 50));
+        directoryItems.add(new DirectoryItem(DirectoryItemType.DIRECTORY, "directory", directory + "/child", "", new Date(), 0));
+        directoryItems.add(new DirectoryItem(DirectoryItemType.IMAGE, "picture", "", "", new Date(), 10));
+        directoryItems.add(new DirectoryItem(DirectoryItemType.AUDIO, "audio", "", "", new Date(), 20 * 1024));
+        directoryItems.add(new DirectoryItem(DirectoryItemType.VIDEO, "video", "", "", new Date(), 30 * 1024 * 1024));
+        directoryItems.add(new DirectoryItem(DirectoryItemType.TEXT, "text", "", "", new Date(), 40L * 1024 * 1024 * 1024));
+        directoryItems.add(new DirectoryItem(DirectoryItemType.OTHER, "other", "", "", new Date(), 50));
         return directoryItems;
     }
 }

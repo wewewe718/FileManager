@@ -151,7 +151,7 @@ public class DirectoryItemsAdapter extends RecyclerView.Adapter<DirectoryItemsAd
     class ViewHolder extends RecyclerView.ViewHolder {
         private ItemDirectoryItemBinding binding;
 
-        public ViewHolder(@NonNull ItemDirectoryItemBinding binding) {
+        ViewHolder(@NonNull ItemDirectoryItemBinding binding) {
             super(binding.getRoot());
             this.binding = binding;
         }
@@ -235,6 +235,8 @@ public class DirectoryItemsAdapter extends RecyclerView.Adapter<DirectoryItemsAd
                     return R.drawable.ic_audio;
                 case VIDEO:
                     return R.drawable.ic_video;
+                case ARCHIVE:
+                    return R.drawable.ic_archive;
                 case TEXT:
                     return R.drawable.ic_document;
                 case OTHER:
@@ -308,7 +310,7 @@ public class DirectoryItemsAdapter extends RecyclerView.Adapter<DirectoryItemsAd
             text = text.toLowerCase();
 
             // Highlight all searchText occurrences
-            int indexOfKeyword = text.indexOf(searchText, 0);
+            int indexOfKeyword = text.indexOf(searchText);
             while (indexOfKeyword >= 0) {
                 //Create a background color span on the keyword
                 result.setSpan(new BackgroundColorSpan(Color.YELLOW), indexOfKeyword, indexOfKeyword + searchText.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
