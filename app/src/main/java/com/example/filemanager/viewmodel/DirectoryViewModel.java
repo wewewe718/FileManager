@@ -3,12 +3,14 @@ package com.example.filemanager.viewmodel;
 import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProvider;
 import android.support.annotation.NonNull;
+import android.util.Pair;
 
 import com.example.filemanager.model.DirectoryItem;
 import com.example.filemanager.model.DirectoryItemType;
 import com.example.filemanager.model.SortType;
 import com.example.filemanager.repository.directory.DirectoryRepository;
 import com.example.filemanager.repository.settings.SettingsRepository;
+import com.example.filemanager.util.FilterHiddenDirectoryItemsUtil;
 import com.example.filemanager.util.SearchDirectoryItemsUtil;
 import com.example.filemanager.util.SortDirectoryItemsUtil;
 import com.example.filemanager.util.Unit;
@@ -212,33 +214,19 @@ public class DirectoryViewModel extends ViewModel {
         showShareItemDialogEvent.onNext(item);
     }
 
-    public void handleChangeSortClicked() {
+    public void handleChangeSortTypeClicked() {
         showSortTypeDialogEvent.onNext(Unit.get());
     }
 
     public void handleSortTypeChanged() {
-        if (cachedDirectoryContent == null)  {
-            return;
-        }
+        refreshCachedDirectoryContent();
+    }
 
-        isLoading.onNext(true);
-
-        Disposable subscription = Single.just(cachedDirectoryContent)
-                .map(this::sortDirectoryItems)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(
-                        result -> {
-                            isLoading.onNext(false);
-                            directoryContent.onNext(result);
-                        },
-                        error -> {
-                            isLoading.onNext(false);
-                            error.printStackTrace();
-                        }
-                );
-
-        disposable.add(subscription);
+    public void handleShowOrHideHiddenFilesClicked() {
+        boolean areHiddenFilesVisible = settingsRepository.areHiddenFilesVisible();
+        areHiddenFilesVisible = !areHiddenFilesVisible;
+        settingsRepository.setHiddenFilesVisible(areHiddenFilesVisible);
+        refreshCachedDirectoryContent();
     }
 
     public void handleCreateDirectoryClicked() {
@@ -272,7 +260,9 @@ public class DirectoryViewModel extends ViewModel {
         isLoading.onNext(true);
 
         Disposable subscription = Single.just(cachedDirectoryContent)
-                .map(items -> searchDirectoryItems(query, items))
+                .map(items -> searchDirectoryItems(items, query))
+                .map(this::filterHiddenFiles)
+                .map(this::sortDirectoryItems)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
@@ -324,17 +314,20 @@ public class DirectoryViewModel extends ViewModel {
         loadDirectoryContent(currentDirectory);
     }
 
-    private void loadDirectoryContent(@NonNull String directory) {
+    private void refreshCachedDirectoryContent() {
+        if (cachedDirectoryContent == null)  {
+            return;
+        }
+
         isLoading.onNext(true);
 
-        Disposable subscription = directoryRepository
-                .getDirectoryContent(directory)
+        Disposable subscription = Single.just(cachedDirectoryContent)
+                .map(this::filterHiddenFiles)
                 .map(this::sortDirectoryItems)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         result -> {
-                            cachedDirectoryContent = result;
                             isLoading.onNext(false);
                             directoryContent.onNext(result);
                         },
@@ -347,6 +340,38 @@ public class DirectoryViewModel extends ViewModel {
         disposable.add(subscription);
     }
 
+    private void loadDirectoryContent(@NonNull String directory) {
+        isLoading.onNext(true);
+
+        Disposable subscription = directoryRepository
+                .getDirectoryContent(directory)
+                .map(items -> new Pair<>(items, filterHiddenFiles(items)))
+                .map(p -> new Pair<>(p.first, sortDirectoryItems(p.second)))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        result -> {
+                            List<DirectoryItem> originalResult = result.first;
+                            List<DirectoryItem> filteredResult = result.second;
+                            cachedDirectoryContent = originalResult;
+                            isLoading.onNext(false);
+                            directoryContent.onNext(filteredResult);
+                        },
+                        error -> {
+                            isLoading.onNext(false);
+                            error.printStackTrace();
+                        }
+                );
+
+        disposable.add(subscription);
+    }
+
+
+    @NonNull
+    private List<DirectoryItem> filterHiddenFiles(@NonNull List<DirectoryItem> items) {
+        boolean showHiddenFiles = settingsRepository.areHiddenFilesVisible();
+        return FilterHiddenDirectoryItemsUtil.filterHiddenFiles(items, showHiddenFiles);
+    }
 
     @NonNull
     private List<DirectoryItem> sortDirectoryItems(@NonNull List<DirectoryItem> items) {
@@ -355,8 +380,8 @@ public class DirectoryViewModel extends ViewModel {
     }
 
     @NonNull
-    private List<DirectoryItem> searchDirectoryItems(@NonNull String query, @NonNull List<DirectoryItem> items) {
-        return SearchDirectoryItemsUtil.searchDirectoryItems(query, items);
+    private List<DirectoryItem> searchDirectoryItems(@NonNull List<DirectoryItem> items, @NonNull String query) {
+        return SearchDirectoryItemsUtil.searchDirectoryItems(items, query);
     }
 
 

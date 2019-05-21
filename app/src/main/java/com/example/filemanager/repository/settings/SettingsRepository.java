@@ -5,9 +5,12 @@ import android.support.annotation.NonNull;
 import com.example.filemanager.model.SortType;
 
 public interface SettingsRepository {
-
     @NonNull
     SortType getSortType();
 
     void setSortType(@NonNull SortType sortType);
+
+    boolean areHiddenFilesVisible();
+
+    void setHiddenFilesVisible(boolean areHiddenFilesVisible);
 }

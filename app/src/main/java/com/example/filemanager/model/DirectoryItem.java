@@ -13,14 +13,16 @@ public class DirectoryItem implements Serializable {
     private String uri;
     private Date lastModificationDate;
     private long fileSizeInBytes;
+    private boolean isHidden;
 
-    public DirectoryItem(@NonNull DirectoryItemType type, @NonNull String name, @NonNull String filePath, @NonNull String uri, @NonNull Date lastModificationDate, long fileSizeInBytes) {
+    public DirectoryItem(@NonNull DirectoryItemType type, @NonNull String name, @NonNull String filePath, @NonNull String uri, @NonNull Date lastModificationDate, long fileSizeInBytes, boolean isHidden) {
         this.type = type;
         this.name = name;
         this.filePath = filePath;
         this.uri = uri;
         this.lastModificationDate = lastModificationDate;
         this.fileSizeInBytes = fileSizeInBytes;
+        this.isHidden = isHidden;
     }
 
     @NonNull
@@ -50,5 +52,9 @@ public class DirectoryItem implements Serializable {
 
     public long getFileSizeInBytes() {
         return fileSizeInBytes;
+    }
+
+    public boolean isHidden() {
+        return isHidden;
     }
 }

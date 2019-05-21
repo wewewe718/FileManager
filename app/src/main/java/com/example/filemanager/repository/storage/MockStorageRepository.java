@@ -17,6 +17,13 @@ public class MockStorageRepository implements StorageRepository {
     public MockStorageRepository() {
         storageModelList.add(new StorageModel("Internal storage", 9, 7));
         storageModelList.add(new StorageModel("External storage", 19, 2));
+        storageModelList.add(new StorageModel("External storage", 19, 2));
+        storageModelList.add(new StorageModel("External storage", 19, 2));
+        storageModelList.add(new StorageModel("External storage", 19, 2));
+        storageModelList.add(new StorageModel("External storage", 19, 2));
+        storageModelList.add(new StorageModel("External storage", 19, 2));
+        storageModelList.add(new StorageModel("External storage", 19, 2));
+        storageModelList.add(new StorageModel("External storage", 19, 2));
     }
 
     @Override

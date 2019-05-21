@@ -196,7 +196,8 @@ public class FileSystemDirectoryRepository implements DirectoryRepository {
                 file.getPath(),
                 file.toURI().toString(),
                 getLastModifiedDate(file),
-                file.length()
+                file.length(),
+                file.isHidden()
         );
     }
 

@@ -10,7 +10,7 @@ import java.util.List;
 public class SearchDirectoryItemsUtil {
 
     @NonNull
-    public static List<DirectoryItem> searchDirectoryItems(@NonNull String query, @NonNull List<DirectoryItem> items) {
+    public static List<DirectoryItem> searchDirectoryItems(@NonNull List<DirectoryItem> items, @NonNull String query) {
         if (query.isEmpty()) {
             return items;
         }

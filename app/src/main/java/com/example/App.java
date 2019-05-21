@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 
 import com.example.filemanager.repository.directory.DirectoryRepository;
 import com.example.filemanager.repository.directory.FileSystemDirectoryRepository;
+import com.example.filemanager.repository.directory.MockDirectoryRepository;
 import com.example.filemanager.repository.settings.SettingsRepository;
 import com.example.filemanager.repository.settings.SharedPreferencesSettingsRepository;
 import com.example.filemanager.repository.storage.FileSystemStorageRepository;
@@ -20,6 +21,7 @@ public class App extends Application {
     public void onCreate() {
         super.onCreate();
         storageRepository = new FileSystemStorageRepository(this);
+        //directoryRepository = new MockDirectoryRepository();
         directoryRepository = new FileSystemDirectoryRepository();
         settingsRepository = new SharedPreferencesSettingsRepository(this);
     }

@@ -21,4 +21,9 @@
         android:title="@string/create_directory"
         app:showAsAction="never"
         />
+    <item
+        android:id="@+id/item_show_or_hide_hidden_files"
+        android:title="@string/show_or_hide_system_files"
+        app:showAsAction="never"
+        />
 </menu>

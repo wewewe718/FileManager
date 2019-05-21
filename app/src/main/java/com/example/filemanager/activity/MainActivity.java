@@ -76,15 +76,17 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+
     private void initQuickAccessItemsView() {
         int columnNumber = 3;
         int orientation = getResources().getConfiguration().orientation;
         if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            columnNumber = 5;
+            columnNumber = 6;
         }
 
         binding.quickAccessItemsGridView.setNumColumns(columnNumber);
         binding.quickAccessItemsGridView.setAdapter(new QuickAccessItemsAdapter(this, this::showQuickAccessItemDirectoryActivity));
+        binding.quickAccessItemsGridView.setExpanded(true);
     }
 
     private void initStorageItemsRecyclerView() {

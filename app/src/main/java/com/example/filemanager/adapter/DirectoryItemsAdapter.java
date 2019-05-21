@@ -2,6 +2,7 @@ package com.example.filemanager.adapter;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.databinding.DataBindingUtil;
 import android.graphics.Color;
@@ -158,8 +159,9 @@ public class DirectoryItemsAdapter extends RecyclerView.Adapter<DirectoryItemsAd
 
         private void bind(@NonNull DirectoryItem item, boolean isItemSelected, boolean isInSelectMode) {
             initEventHandlers(item, isItemSelected);
-            showDirectoryItemName(item);
-            showDirectoryItemTypeImage(item);
+            showName(item);
+            showTypeImage(item);
+            showIsHidden(item);
             showDateIfNeeded(item);
             showFileSizeIfNeeded(item);
             showItemSelected(isItemSelected);
@@ -179,7 +181,7 @@ public class DirectoryItemsAdapter extends RecyclerView.Adapter<DirectoryItemsAd
             });
         }
 
-        private void showDirectoryItemName(@NonNull DirectoryItem item) {
+        private void showName(@NonNull DirectoryItem item) {
             CharSequence name;
             if (searchQuery.isEmpty()) {
                 name = item.getName();
@@ -189,9 +191,16 @@ public class DirectoryItemsAdapter extends RecyclerView.Adapter<DirectoryItemsAd
             binding.textViewName.setText(name);
         }
 
-        private void showDirectoryItemTypeImage(@NonNull DirectoryItem item) {
-            int drawable = mapDirectoryTypeToDrawable(item.getType());
+        private void showTypeImage(@NonNull DirectoryItem item) {
+            int drawable = getTypeDrawable(item.getType());
             binding.imageViewItemType.setBackgroundResource(drawable);
+        }
+
+        private void showIsHidden(@NonNull DirectoryItem item) {
+            Resources resources = binding.getRoot().getContext().getResources();
+            int tintResId = item.isHidden() ? R.color.colorAccentTransparent : R.color.colorAccent;
+            int tintColor = resources.getColor(tintResId);
+            binding.imageViewItemType.setBackgroundTintList(ColorStateList.valueOf(tintColor));
         }
 
         private void showDateIfNeeded(@NonNull DirectoryItem item) {
@@ -225,7 +234,7 @@ public class DirectoryItemsAdapter extends RecyclerView.Adapter<DirectoryItemsAd
         }
 
         @DrawableRes
-        private int mapDirectoryTypeToDrawable(@NonNull DirectoryItemType itemType) {
+        private int getTypeDrawable(@NonNull DirectoryItemType itemType) {
             switch (itemType) {
                 case DIRECTORY:
                     return R.drawable.ic_directory;

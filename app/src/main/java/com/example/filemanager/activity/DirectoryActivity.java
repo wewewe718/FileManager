@@ -13,7 +13,6 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.view.ActionMode;
 import android.view.Menu;
@@ -144,11 +143,15 @@ public class DirectoryActivity extends AppCompatActivity implements
                 break;
             }
             case R.id.item_sort: {
-                viewModel.handleChangeSortClicked();
+                viewModel.handleChangeSortTypeClicked();
                 break;
             }
             case R.id.item_create_directory: {
                 viewModel.handleCreateDirectoryClicked();
+                break;
+            }
+            case R.id.item_show_or_hide_hidden_files: {
+                viewModel.handleShowOrHideHiddenFilesClicked();
                 break;
             }
             default: {

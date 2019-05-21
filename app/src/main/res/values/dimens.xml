@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="default_padding">16dp</dimen>
+    <dimen name="default_padding_large">24dp</dimen>
     <dimen name="default_card_view_elevation">1dp</dimen>
 
     <dimen name="quick_access_items_grid_view_spacing">4dp</dimen>
