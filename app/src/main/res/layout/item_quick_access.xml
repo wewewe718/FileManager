@@ -24,6 +24,7 @@
                 android:layout_width="@dimen/quick_access_items_icon_size"
                 android:layout_height="@dimen/quick_access_items_icon_size"
                 android:layout_gravity="center"
+                android:backgroundTint="@color/colorPrimary"
                 />
             <TextView
                 android:id="@+id/quick_access_item_icon_text_view"

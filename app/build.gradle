@@ -29,6 +29,7 @@ def supportVersion = '28.0.0'
 def rxJava2Version = '2.2.3'
 def rxAndroidVersion = '2.1.1'
 def viewModelVersion = "1.1.1"
+def picassoVersion = "2.71828"
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
@@ -43,4 +44,7 @@ dependencies {
     // RxJava 2
     implementation "io.reactivex.rxjava2:rxjava:$rxJava2Version"
     implementation "io.reactivex.rxjava2:rxandroid:$rxAndroidVersion"
+
+    // Picasso
+    implementation "com.squareup.picasso:picasso:$picassoVersion"
 }

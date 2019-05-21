@@ -6,9 +6,11 @@ import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.databinding.DataBindingUtil;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
+import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.view.menu.MenuBuilder;
 import android.support.v7.view.menu.MenuPopupHelper;
 import android.support.v7.widget.PopupMenu;
@@ -28,6 +30,7 @@ import com.example.filemanager.model.DirectoryItem;
 import com.example.filemanager.model.DirectoryItemType;
 import com.example.filemanager.util.DateFormatUtil;
 import com.example.filemanager.util.FileSizeFormatUtil;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -161,7 +164,6 @@ public class DirectoryItemsAdapter extends RecyclerView.Adapter<DirectoryItemsAd
             initEventHandlers(item, isItemSelected);
             showName(item);
             showTypeImage(item);
-            showIsHidden(item);
             showDateIfNeeded(item);
             showFileSizeIfNeeded(item);
             showItemSelected(isItemSelected);
@@ -192,15 +194,33 @@ public class DirectoryItemsAdapter extends RecyclerView.Adapter<DirectoryItemsAd
         }
 
         private void showTypeImage(@NonNull DirectoryItem item) {
-            int drawable = getTypeDrawable(item.getType());
-            binding.imageViewItemType.setBackgroundResource(drawable);
-        }
+            if (item.getType() == DirectoryItemType.IMAGE) {
+                showImagePreview(item);
+                return;
+            }
 
-        private void showIsHidden(@NonNull DirectoryItem item) {
             Resources resources = binding.getRoot().getContext().getResources();
+
+            int drawableResId = getTypeDrawable(item.getType());
+            Drawable drawable = resources.getDrawable(drawableResId);
+
             int tintResId = item.isHidden() ? R.color.colorAccentTransparent : R.color.colorAccent;
             int tintColor = resources.getColor(tintResId);
-            binding.imageViewItemType.setBackgroundTintList(ColorStateList.valueOf(tintColor));
+
+            DrawableCompat.setTint(drawable, tintColor);
+
+            binding.imageViewItemType.setImageDrawable(drawable);
+        }
+
+        private void showImagePreview(@NonNull DirectoryItem item) {
+            binding.imageViewItemType.clearColorFilter();
+
+            Picasso.get()
+                    .load(item.getUri())
+                    .placeholder(R.drawable.ic_image)
+                    .error(R.drawable.ic_image)
+                    .fit()
+                    .into(binding.imageViewItemType);
         }
 
         private void showDateIfNeeded(@NonNull DirectoryItem item) {
@@ -213,7 +233,7 @@ public class DirectoryItemsAdapter extends RecyclerView.Adapter<DirectoryItemsAd
         }
 
         private void showFileSizeIfNeeded(@NonNull DirectoryItem item) {
-            if (item.getType().equals(DirectoryItemType.DIRECTORY)) {
+            if (item.getType() == DirectoryItemType.DIRECTORY) {
                 return;
             }
 
