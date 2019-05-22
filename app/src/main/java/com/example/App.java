@@ -20,9 +20,13 @@ public class App extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+
+        //storageRepository = new MockStorageRepository();
         storageRepository = new FileSystemStorageRepository(this);
+
         //directoryRepository = new MockDirectoryRepository();
         directoryRepository = new FileSystemDirectoryRepository();
+
         settingsRepository = new SharedPreferencesSettingsRepository(this);
     }
 

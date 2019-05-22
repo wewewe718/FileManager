@@ -3,6 +3,7 @@ package com.example.filemanager.repository.storage;
 import android.support.annotation.NonNull;
 
 import com.example.filemanager.model.StorageModel;
+import com.example.filemanager.model.exception.LoadStoragesException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +30,7 @@ public class MockStorageRepository implements StorageRepository {
     @Override
     @NonNull
     public Single<List<StorageModel>> getStorageList() {
+        //return Single.error(new LoadStoragesException(new Exception()));
         return Single.just(storageModelList)
                 .delay(500, TimeUnit.MILLISECONDS)
                 .subscribeOn(Schedulers.io());

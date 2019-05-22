@@ -43,6 +43,7 @@ public class DirectoryViewModel extends ViewModel {
     public Subject<Boolean> isLoading = BehaviorSubject.createDefault(true);
     public Subject<String> currentDirectory = BehaviorSubject.create();
     public Subject<List<DirectoryItem>> directoryContent = BehaviorSubject.create();
+    public Subject<Throwable> error = PublishSubject.create();
 
     public BehaviorSubject<Boolean> isCopyModeEnabled = BehaviorSubject.create();
     public Subject<Boolean> isCopyDialogVisible = BehaviorSubject.create();
@@ -132,6 +133,7 @@ public class DirectoryViewModel extends ViewModel {
                         },
                         error -> {
                             isCopyDialogVisible.onNext(false);
+                            this.error.onNext(error);
                             disableCopyMode();
                             error.printStackTrace();
                         }
@@ -145,6 +147,10 @@ public class DirectoryViewModel extends ViewModel {
     }
 
     public void handleRenameConfirmed(@NonNull String newName, @NonNull DirectoryItem item) {
+        if (item.getName().equals(newName)) {
+            return;
+        }
+
         isLoading.onNext(true);
 
         Disposable subscription = directoryRepository
@@ -155,6 +161,7 @@ public class DirectoryViewModel extends ViewModel {
                         this::refreshCurrentDirectory,
                         error -> {
                             isLoading.onNext(false);
+                            this.error.onNext(error);
                             error.printStackTrace();
                         }
                 );
@@ -181,6 +188,7 @@ public class DirectoryViewModel extends ViewModel {
                         this::refreshCurrentDirectory,
                         error -> {
                             isLoading.onNext(false);
+                            this.error.onNext(error);
                             error.printStackTrace();
                         }
                 );
@@ -199,6 +207,7 @@ public class DirectoryViewModel extends ViewModel {
                         this::refreshCurrentDirectory,
                         error -> {
                             isLoading.onNext(false);
+                            this.error.onNext(error);
                             error.printStackTrace();
                         }
                 );
@@ -245,6 +254,7 @@ public class DirectoryViewModel extends ViewModel {
                         this::refreshCurrentDirectory,
                         error -> {
                             isLoading.onNext(false);
+                            this.error.onNext(error);
                             error.printStackTrace();
                         }
                 );
@@ -273,6 +283,7 @@ public class DirectoryViewModel extends ViewModel {
                         },
                         error -> {
                             isLoading.onNext(false);
+                            this.error.onNext(error);
                             error.printStackTrace();
                         }
                 );
@@ -333,6 +344,7 @@ public class DirectoryViewModel extends ViewModel {
                         },
                         error -> {
                             isLoading.onNext(false);
+                            this.error.onNext(error);
                             error.printStackTrace();
                         }
                 );
@@ -359,6 +371,7 @@ public class DirectoryViewModel extends ViewModel {
                         },
                         error -> {
                             isLoading.onNext(false);
+                            this.error.onNext(error);
                             error.printStackTrace();
                         }
                 );

@@ -74,10 +74,10 @@
     <string name="error_delete_file">Unable to delete file</string>
     <string name="error_directory_with_this_name_already_exists">Directory with the same name already exists</string>
     <string name="error_file_does_not_exist">File does not exist</string>
-    <string name="error_file_with_this_name_already_exists">File with the same name already exists</string>
+    <string name="error_file_with_this_name_already_exists">File or directory with the same name already exists</string>
     <string name="error_load_directory_content">Unable to load directory content</string>
     <string name="error_load_storages">Unable to load storages</string>
-    <string name="error_rename_file">Unable to rename file</string>
-    <string name="error_unknown">Unable to rename file</string>
+    <string name="error_rename_file">Unable to rename file or directory</string>
+    <string name="error_unknown">Unknown error</string>
 
 </resources>

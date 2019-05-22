@@ -4,6 +4,14 @@ import android.support.annotation.NonNull;
 
 import com.example.filemanager.model.DirectoryItem;
 import com.example.filemanager.model.DirectoryItemType;
+import com.example.filemanager.model.exception.CreateDirectoryException;
+import com.example.filemanager.model.exception.DeleteDirectoryException;
+import com.example.filemanager.model.exception.DeleteFileException;
+import com.example.filemanager.model.exception.DirectoryWithThisNameAlreadyExistsException;
+import com.example.filemanager.model.exception.FileDoesNotExistException;
+import com.example.filemanager.model.exception.FileWithThisNameAlreadyExistsException;
+import com.example.filemanager.model.exception.LoadDirectoryContentException;
+import com.example.filemanager.model.exception.RenameFileException;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -19,6 +27,7 @@ public class MockDirectoryRepository implements DirectoryRepository {
     @NonNull
     @Override
     public Single<List<DirectoryItem>> getDirectoryContent(@NonNull String directory) {
+        //return Single.error(new LoadDirectoryContentException(new Exception()));
         return Single.just(createMockDirectoryItemList(directory))
                 .delay(500, TimeUnit.MILLISECONDS)
                 .subscribeOn(Schedulers.io());
@@ -27,6 +36,8 @@ public class MockDirectoryRepository implements DirectoryRepository {
     @NonNull
     @Override
     public Completable createDirectory(@NonNull String rootDirectoryFullPath, @NonNull String newDirectoryName) {
+        //return Completable.error(new CreateDirectoryException());
+        //return Completable.error(new DirectoryWithThisNameAlreadyExistsException());
         return Completable.complete()
                 .delay(3500, TimeUnit.MILLISECONDS)
                 .subscribeOn(Schedulers.io());
@@ -43,6 +54,8 @@ public class MockDirectoryRepository implements DirectoryRepository {
     @NonNull
     @Override
     public Completable rename(@NonNull String newName, @NonNull DirectoryItem item) {
+        //return Completable.error(new FileWithThisNameAlreadyExistsException());
+        //return Completable.error(new RenameFileException());
         return Completable.complete()
                 .delay(1500, TimeUnit.MILLISECONDS)
                 .subscribeOn(Schedulers.io());
@@ -51,6 +64,9 @@ public class MockDirectoryRepository implements DirectoryRepository {
     @NonNull
     @Override
     public Completable delete(@NonNull DirectoryItem item) {
+        //return Completable.error(new DeleteDirectoryException());
+        //return Completable.error(new DeleteFileException());
+        //return Completable.error(new FileDoesNotExistException());
         return Completable.complete()
                 .delay(1500, TimeUnit.MILLISECONDS)
                 .subscribeOn(Schedulers.io());
@@ -59,6 +75,9 @@ public class MockDirectoryRepository implements DirectoryRepository {
     @NonNull
     @Override
     public Completable delete(@NonNull List<DirectoryItem> items) {
+        //return Completable.error(new DeleteDirectoryException());
+        //return Completable.error(new DeleteFileException());
+        //return Completable.error(new FileDoesNotExistException());
         return Completable.complete()
                 .delay(1500, TimeUnit.MILLISECONDS)
                 .subscribeOn(Schedulers.io());

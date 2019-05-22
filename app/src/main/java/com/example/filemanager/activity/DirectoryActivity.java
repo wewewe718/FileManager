@@ -28,6 +28,7 @@ import com.example.filemanager.dialog.CopyDialog;
 import com.example.filemanager.dialog.CreateDirectoryDialogFragment;
 import com.example.filemanager.dialog.DeleteDirectoryItemDialogFragment;
 import com.example.filemanager.dialog.DirectoryItemInfoDialogFragment;
+import com.example.filemanager.dialog.ErrorDialogFragment;
 import com.example.filemanager.dialog.RenameDirectoryItemDialogFragment;
 import com.example.filemanager.dialog.SortTypeDialogFragment;
 import com.example.filemanager.model.DirectoryItem;
@@ -292,6 +293,7 @@ public class DirectoryActivity extends AppCompatActivity implements
                 viewModel.isLoading.subscribe(this::showIsLoading),
                 viewModel.currentDirectory.subscribe(this::showCurrentDirectory),
                 viewModel.directoryContent.subscribe(this::showDirectoryContent),
+                viewModel.error.subscribe(this::showError),
                 viewModel.searchQuery.subscribe(this::showSearchQuery),
                 viewModel.isCopyModeEnabled.subscribe(this::showCopyModeEnabled),
                 viewModel.isCopyDialogVisible.subscribe(this::showOrHideCopyDialog),
@@ -330,6 +332,11 @@ public class DirectoryActivity extends AppCompatActivity implements
 
         adapter.setData(directoryContent);
         recyclerViewLayoutManager.scrollToPositionWithOffset(0, 0);
+    }
+
+    private void showError(@NonNull Throwable error) {
+        ErrorDialogFragment dialog = ErrorDialogFragment.newInstance(error);
+        dialog.show(getSupportFragmentManager(), "ErrorDialogFragment");
     }
 
     private void showSearchQuery(@NonNull String searchQuery) {
