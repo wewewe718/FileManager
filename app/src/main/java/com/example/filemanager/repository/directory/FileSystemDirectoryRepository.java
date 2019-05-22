@@ -4,6 +4,14 @@ import android.support.annotation.NonNull;
 
 import com.example.filemanager.model.DirectoryItem;
 import com.example.filemanager.model.DirectoryItemType;
+import com.example.filemanager.model.exception.CreateDirectoryException;
+import com.example.filemanager.model.exception.DeleteDirectoryException;
+import com.example.filemanager.model.exception.DeleteFileException;
+import com.example.filemanager.model.exception.DirectoryWithThisNameAlreadyExistsException;
+import com.example.filemanager.model.exception.FileWithThisNameAlreadyExistsException;
+import com.example.filemanager.model.exception.FileDoesNotExistException;
+import com.example.filemanager.model.exception.LoadDirectoryContentException;
+import com.example.filemanager.model.exception.RenameFileException;
 import com.example.filemanager.util.DirectoryItemTypeUtil;
 
 import java.io.File;
@@ -25,7 +33,7 @@ public class FileSystemDirectoryRepository implements DirectoryRepository {
                 List<DirectoryItem> result = tryGetDirectoryContent(directory);
                 emitter.onSuccess(result);
             } catch (Exception ex) {
-                emitter.onError(ex);
+                emitter.onError(new LoadDirectoryContentException(ex));
             }
         });
     }
@@ -111,12 +119,12 @@ public class FileSystemDirectoryRepository implements DirectoryRepository {
         String newDirectoryPath = rootDirectoryFullPath + FILE_PATH_SEPARATOR + newDirectoryName;
         File dir = new File(newDirectoryPath);
         if (dir.exists()) {
-            throw new IllegalStateException("Directory already exists");
+            throw new DirectoryWithThisNameAlreadyExistsException();
         }
 
         boolean isDirectoryCreated = dir.mkdir();
         if (!isDirectoryCreated) {
-            throw new IllegalStateException("Unable to create directory");
+            throw new CreateDirectoryException();
         }
     }
 
@@ -126,12 +134,12 @@ public class FileSystemDirectoryRepository implements DirectoryRepository {
         String newFileName = file.getParent() + FILE_PATH_SEPARATOR + newName;
         File newFile = new File(newFileName);
         if (newFile.exists()) {
-            throw new IllegalStateException("File already exists");
+            throw new FileWithThisNameAlreadyExistsException();
         }
 
         boolean isFileRenamed = file.renameTo(new File(newFileName));
         if (!isFileRenamed) {
-            throw new IllegalStateException("Unable to rename file");
+            throw new RenameFileException();
         }
     }
 
@@ -158,7 +166,7 @@ public class FileSystemDirectoryRepository implements DirectoryRepository {
 
     private void tryDeleteFileOrDirectory(@NonNull File fileOrDirectory) {
         if (!fileOrDirectory.exists()) {
-            throw new IllegalStateException("File does not exist");
+            throw new FileDoesNotExistException();
         }
 
         if (fileOrDirectory.isDirectory()) {
@@ -176,14 +184,14 @@ public class FileSystemDirectoryRepository implements DirectoryRepository {
 
         boolean isDirectoryDeleted = directory.delete();
         if (!isDirectoryDeleted) {
-            throw new IllegalStateException("Unable to delete directory");
+            throw new DeleteDirectoryException();
         }
     }
 
     private void tryDeleteFile(@NonNull File file) {
         boolean isFileDeleted = file.delete();
         if (!isFileDeleted) {
-            throw new IllegalStateException("Unable to delete file");
+            throw new DeleteFileException();
         }
     }
 

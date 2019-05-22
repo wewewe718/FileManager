@@ -14,6 +14,7 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.reactivex.subjects.BehaviorSubject;
+import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.Subject;
 
 public class StorageListViewModel extends ViewModel {
@@ -22,6 +23,7 @@ public class StorageListViewModel extends ViewModel {
 
     public Subject<Boolean> isLoading = BehaviorSubject.createDefault(true);
     public Subject<List<StorageModel>> storageList = BehaviorSubject.create();
+    public Subject<Throwable> error = PublishSubject.create();
 
     public StorageListViewModel(@NonNull StorageRepository storageRepository) {
         this.storageRepository = storageRepository;
@@ -42,6 +44,7 @@ public class StorageListViewModel extends ViewModel {
                         },
                         error -> {
                             isLoading.onNext(false);
+                            this.error.onNext(error);
                             error.printStackTrace();
                         }
                 );

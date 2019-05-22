@@ -66,4 +66,18 @@
 
     <string name="copy_dialog_title">Copy</string>
 
+    <string name="error_dialog_title">Error</string>
+    <string name="error_dialog_positive_button">OK</string>
+
+    <string name="error_create_directory">Unable to create directory</string>
+    <string name="error_delete_directory">Unable to delete directory</string>
+    <string name="error_delete_file">Unable to delete file</string>
+    <string name="error_directory_with_this_name_already_exists">Directory with the same name already exists</string>
+    <string name="error_file_does_not_exist">File does not exist</string>
+    <string name="error_file_with_this_name_already_exists">File with the same name already exists</string>
+    <string name="error_load_directory_content">Unable to load directory content</string>
+    <string name="error_load_storages">Unable to load storages</string>
+    <string name="error_rename_file">Unable to rename file</string>
+    <string name="error_unknown">Unable to rename file</string>
+
 </resources>

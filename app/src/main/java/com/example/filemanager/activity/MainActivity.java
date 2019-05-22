@@ -17,6 +17,7 @@ import com.example.filemanager.R;
 import com.example.filemanager.adapter.QuickAccessItemsAdapter;
 import com.example.filemanager.adapter.StorageItemsAdapter;
 import com.example.filemanager.databinding.ActivityMainBinding;
+import com.example.filemanager.dialog.ErrorDialogFragment;
 import com.example.filemanager.model.StorageModel;
 import com.example.filemanager.repository.storage.StorageRepository;
 import com.example.filemanager.util.PermissionsUtil;
@@ -108,7 +109,8 @@ public class MainActivity extends AppCompatActivity {
     private void subscribeToViewModel() {
         viewModelDisposable.addAll(
                 viewModel.isLoading.subscribe(this::showIsLoading),
-                viewModel.storageList.subscribe(this::showStorageItems)
+                viewModel.storageList.subscribe(this::showStorageItems),
+                viewModel.error.subscribe(this::showError)
         );
     }
 
@@ -124,6 +126,11 @@ public class MainActivity extends AppCompatActivity {
 
     private void showStorageItems(@NonNull List<StorageModel> storageModels) {
         adapter.setData(storageModels);
+    }
+
+    private void showError(@NonNull Throwable error) {
+        ErrorDialogFragment fragment = ErrorDialogFragment.newInstance(error);
+        fragment.show(getSupportFragmentManager(), "ErrorDialogFragment");
     }
 
 

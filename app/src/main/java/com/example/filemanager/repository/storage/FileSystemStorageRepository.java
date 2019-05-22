@@ -10,6 +10,7 @@ import android.support.v4.app.ActivityCompat;
 import android.text.TextUtils;
 
 import com.example.filemanager.model.StorageModel;
+import com.example.filemanager.model.exception.LoadStoragesException;
 
 import java.io.File;
 import java.io.IOException;
@@ -40,7 +41,7 @@ public class FileSystemStorageRepository implements StorageRepository {
                 List<StorageModel> result = tryGetStorageList();
                 emitter.onSuccess(result);
             } catch (Exception ex) {
-                emitter.onError(ex);
+                emitter.onError(new LoadStoragesException(ex));
             }
         });
     }
