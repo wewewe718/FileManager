@@ -55,7 +55,7 @@ public class DirectoryViewModel extends ViewModel {
     public Subject<DirectoryItem> showDeleteItemDialogEvent = PublishSubject.create();
     public Subject<List<DirectoryItem>> showDeleteItemsDialogEvent = PublishSubject.create();
     public Subject<DirectoryItem> showInfoItemDialogEvent = PublishSubject.create();
-    public Subject<DirectoryItem> showShareItemDialogEvent = PublishSubject.create();
+    public Subject<DirectoryItem> shareFileEvent = PublishSubject.create();
     public Subject<DirectoryItem> openFileEvent = PublishSubject.create();
     public Subject<Unit> closeScreenEvent = PublishSubject.create();
 
@@ -220,7 +220,7 @@ public class DirectoryViewModel extends ViewModel {
     }
 
     public void handleShareClicked(@NonNull DirectoryItem item) {
-        showShareItemDialogEvent.onNext(item);
+        shareFileEvent.onNext(item);
     }
 
     public void handleChangeSortTypeClicked() {

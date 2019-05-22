@@ -305,6 +305,7 @@ public class DirectoryActivity extends AppCompatActivity implements
                 viewModel.showDeleteItemsDialogEvent.subscribe(this::showDeleteDirectoryItemsDialog),
                 viewModel.showInfoItemDialogEvent.subscribe(this::showDirectoryItemInfoDialog),
                 viewModel.openFileEvent.subscribe(this::openFile),
+                viewModel.shareFileEvent.subscribe(this::shareFile),
                 viewModel.closeScreenEvent.subscribe(u -> closeScreen())
         );
     }
@@ -407,11 +408,19 @@ public class DirectoryActivity extends AppCompatActivity implements
     }
 
     private void openFile(@NonNull DirectoryItem item) {
+        startActivity(item, Intent.ACTION_VIEW);
+    }
+
+    private void shareFile(@NonNull DirectoryItem item) {
+        startActivity(item, Intent.ACTION_SEND);
+    }
+
+    private void startActivity(@NonNull DirectoryItem item, @NonNull String action) {
         Uri uri = Uri.parse(item.getUri());
         String mimeType = MimeTypeUtil.getMimeType(item);
 
         Intent intent = new Intent();
-        intent.setAction(Intent.ACTION_VIEW);
+        intent.setAction(action);
         intent.setDataAndType(uri, mimeType);
 
         if (intent.resolveActivity(getPackageManager()) == null) {
