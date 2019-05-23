@@ -1,41 +1,70 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout>
-    <FrameLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    >
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
         >
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/directory_content_recycler_view"
+        <android.support.design.widget.AppBarLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:visibility="gone"
-            />
-        <TextView
-            android:id="@+id/text_view_empty_directory"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="@string/empty_directory"
-            android:visibility="gone"
-            />
-        <ProgressBar
-            android:id="@+id/directory_content_loading_progress_bar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:indeterminate="true"
-            />
-        <android.support.design.widget.FloatingActionButton
-            android:id="@+id/fab_paste"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/default_padding"
-            android:layout_marginEnd="@dimen/default_padding"
-            android:layout_gravity="bottom|end"
-            android:src="@drawable/ic_paste"
-            android:visibility="gone"
-            />
-    </FrameLayout>
+            >
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?android:actionBarSize"
+                android:theme="@style/ToolbarTheme"
+                app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+                style="@style/ToolbarStyle"
+                />
+            <TextView
+                android:id="@+id/directory_path_text_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/default_padding"
+                android:layout_marginEnd="@dimen/default_padding"
+                android:layout_marginBottom="@dimen/default_padding"
+                android:textColor="@color/white"
+                />
+        </android.support.design.widget.AppBarLayout>
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            >
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/directory_content_recycler_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                />
+            <TextView
+                android:id="@+id/empty_directory_text_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="@string/empty_directory"
+                android:visibility="gone"
+                />
+            <ProgressBar
+                android:id="@+id/directory_content_loading_progress_bar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:indeterminate="true"
+                />
+            <android.support.design.widget.FloatingActionButton
+                android:id="@+id/paste_fab"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/default_padding"
+                android:layout_marginEnd="@dimen/default_padding"
+                android:layout_gravity="bottom|end"
+                android:src="@drawable/ic_paste"
+                android:visibility="gone"
+                />
+        </FrameLayout>
+    </LinearLayout>    
 </layout>

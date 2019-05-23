@@ -233,6 +233,8 @@ public class DirectoryActivity extends AppCompatActivity implements
 
 
     private void initActionBar() {
+        setSupportActionBar(binding.toolbar);
+
         ActionBar actionBar = getSupportActionBar();
         if (actionBar == null) {
             return;
@@ -266,7 +268,7 @@ public class DirectoryActivity extends AppCompatActivity implements
     }
 
     private void initPasteButton() {
-        binding.fabPaste.setOnClickListener(v -> viewModel.handlePasteClicked());
+        binding.pasteFab.setOnClickListener(v -> viewModel.handlePasteClicked());
     }
 
 
@@ -321,15 +323,12 @@ public class DirectoryActivity extends AppCompatActivity implements
     }
 
     private void showCurrentDirectory(@NonNull String currentDirectory) {
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setTitle(currentDirectory);
-        }
+        binding.directoryPathTextView.setText(currentDirectory);
     }
 
     private void showDirectoryContent(@NonNull List<DirectoryItem> directoryContent) {
         boolean isEmpty = directoryContent.isEmpty();
-        binding.textViewEmptyDirectory.setVisibility(isEmpty ? View.VISIBLE : View.GONE);
+        binding.emptyDirectoryTextView.setVisibility(isEmpty ? View.VISIBLE : View.GONE);
 
         adapter.setData(directoryContent);
         recyclerViewLayoutManager.scrollToPositionWithOffset(0, 0);
@@ -349,7 +348,7 @@ public class DirectoryActivity extends AppCompatActivity implements
         int fabVisibility = isCopyModeEnabled ? View.VISIBLE : View.GONE;
         int iconId = isCopyModeEnabled ? R.drawable.ic_clear : R.drawable.ic_arrow_back;
 
-        binding.fabPaste.setVisibility(fabVisibility);
+        binding.pasteFab.setVisibility(fabVisibility);
 
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
