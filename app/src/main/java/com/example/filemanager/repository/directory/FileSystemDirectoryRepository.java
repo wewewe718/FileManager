@@ -4,15 +4,14 @@ import android.support.annotation.NonNull;
 
 import com.example.filemanager.model.DirectoryItem;
 import com.example.filemanager.model.DirectoryItemType;
-import com.example.filemanager.model.exception.CreateDirectoryException;
-import com.example.filemanager.model.exception.DeleteDirectoryException;
-import com.example.filemanager.model.exception.DeleteFileException;
-import com.example.filemanager.model.exception.DirectoryWithThisNameAlreadyExistsException;
-import com.example.filemanager.model.exception.FileWithThisNameAlreadyExistsException;
-import com.example.filemanager.model.exception.FileDoesNotExistException;
 import com.example.filemanager.model.exception.LoadDirectoryContentException;
-import com.example.filemanager.model.exception.RenameFileException;
 import com.example.filemanager.util.DirectoryItemTypeUtil;
+import com.example.filemanager.util.filesystem.CopyUtil;
+import com.example.filemanager.util.filesystem.CreateDirectoryUtil;
+import com.example.filemanager.util.filesystem.DeleteUtil;
+import com.example.filemanager.util.filesystem.DirectoryContentUtil;
+import com.example.filemanager.util.filesystem.MoveUtil;
+import com.example.filemanager.util.filesystem.RenameUtil;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -21,9 +20,9 @@ import java.util.List;
 
 import io.reactivex.Completable;
 import io.reactivex.Single;
+import io.reactivex.functions.Action;
 
 public class FileSystemDirectoryRepository implements DirectoryRepository {
-    private static final String FILE_PATH_SEPARATOR = File.separator;
 
     @NonNull
     @Override
@@ -41,54 +40,38 @@ public class FileSystemDirectoryRepository implements DirectoryRepository {
     @NonNull
     @Override
     public Completable createDirectory(@NonNull String rootDirectoryFullPath, @NonNull String newDirectoryName) {
-        return Completable.create(emitter -> {
-            try {
-                tryCreateDirectory(rootDirectoryFullPath, newDirectoryName);
-                emitter.onComplete();
-            } catch (Exception ex) {
-                emitter.onError(ex);
-            }
-        });
+        return createCompletable(() -> tryCreateDirectory(rootDirectoryFullPath, newDirectoryName));
     }
 
     @NonNull
     @Override
     public Completable moveAndCopy(@NonNull String targetDirectoryFullPath, @NonNull List<DirectoryItem> itemsToMove, @NonNull List<DirectoryItem> itemsToCopy) {
-        return null;
+        return createCompletable(() -> tryMoveAndCopy(targetDirectoryFullPath, itemsToMove, itemsToCopy));
     }
 
     @NonNull
     @Override
     public Completable rename(@NonNull String newName, @NonNull DirectoryItem item) {
-        return Completable.create(emitter -> {
-           try {
-               tryRename(newName, item);
-               emitter.onComplete();
-           } catch (Exception ex) {
-             emitter.tryOnError(ex);
-           }
-        });
+        return createCompletable(() -> tryRename(newName, item));
     }
 
     @NonNull
     @Override
     public Completable delete(@NonNull DirectoryItem item) {
-        return Completable.create(emitter -> {
-            try {
-                tryDelete(item);
-                emitter.onComplete();
-            } catch (Exception ex) {
-                emitter.onError(ex);
-            }
-        });
+        return createCompletable(() -> tryDelete(item));
     }
 
     @NonNull
     @Override
     public Completable delete(@NonNull List<DirectoryItem> items) {
+        return createCompletable(() -> tryDelete(items));
+    }
+
+    @NonNull
+    private Completable createCompletable(@NonNull Action action) {
         return Completable.create(emitter -> {
             try {
-                tryDelete(items);
+                action.run();
                 emitter.onComplete();
             } catch (Exception ex) {
                 emitter.onError(ex);
@@ -99,13 +82,9 @@ public class FileSystemDirectoryRepository implements DirectoryRepository {
 
     @NonNull
     private List<DirectoryItem> tryGetDirectoryContent(@NonNull String directory) {
-        List<DirectoryItem> result = new ArrayList<>();
+        File[] files = DirectoryContentUtil.getDirectoryContent(directory);
 
-        File dir = new File(directory);
-        File[] files = dir.listFiles();
-        if (files == null) {
-            return result;
-        }
+        List<DirectoryItem> result = new ArrayList<>();
 
         for (File file : files) {
             DirectoryItem item = createDirectoryItemFromFile(file);
@@ -116,31 +95,28 @@ public class FileSystemDirectoryRepository implements DirectoryRepository {
     }
 
     private void tryCreateDirectory(@NonNull String rootDirectoryFullPath, @NonNull String newDirectoryName) {
-        String newDirectoryPath = rootDirectoryFullPath + FILE_PATH_SEPARATOR + newDirectoryName;
-        File dir = new File(newDirectoryPath);
-        if (dir.exists()) {
-            throw new DirectoryWithThisNameAlreadyExistsException();
-        }
+        CreateDirectoryUtil.createDirectory(rootDirectoryFullPath, newDirectoryName);
+    }
 
-        boolean isDirectoryCreated = dir.mkdir();
-        if (!isDirectoryCreated) {
-            throw new CreateDirectoryException();
+    private void tryMoveAndCopy(@NonNull String targetDirectoryFullPath, @NonNull List<DirectoryItem> itemsToMove, @NonNull List<DirectoryItem> itemsToCopy) {
+        tryMove(targetDirectoryFullPath, itemsToMove);
+        tryCopy(targetDirectoryFullPath, itemsToCopy);
+    }
+
+    private void tryMove(@NonNull String targetDirectoryFullPath, @NonNull List<DirectoryItem> items) {
+        for (DirectoryItem item : items) {
+            MoveUtil.move(item.getFilePath(), targetDirectoryFullPath);
+        }
+    }
+
+    private void tryCopy(@NonNull String targetDirectoryFullPath, @NonNull List<DirectoryItem> items) {
+        for (DirectoryItem item : items) {
+            CopyUtil.copy(item.getFilePath(), targetDirectoryFullPath);
         }
     }
 
     private void tryRename(@NonNull String newName, @NonNull DirectoryItem item) {
-        File file = new File(item.getFilePath());
-
-        String newFileName = file.getParent() + FILE_PATH_SEPARATOR + newName;
-        File newFile = new File(newFileName);
-        if (newFile.exists()) {
-            throw new FileWithThisNameAlreadyExistsException();
-        }
-
-        boolean isFileRenamed = file.renameTo(new File(newFileName));
-        if (!isFileRenamed) {
-            throw new RenameFileException();
-        }
+        RenameUtil.rename(item.getFilePath(), newName);
     }
 
     private void tryDelete(@NonNull List<DirectoryItem> items) throws Exception {
@@ -161,38 +137,7 @@ public class FileSystemDirectoryRepository implements DirectoryRepository {
 
     private void tryDelete(@NonNull DirectoryItem item) {
         File fileOrDirectory = new File(item.getFilePath());
-        tryDeleteFileOrDirectory(fileOrDirectory);
-    }
-
-    private void tryDeleteFileOrDirectory(@NonNull File fileOrDirectory) {
-        if (!fileOrDirectory.exists()) {
-            throw new FileDoesNotExistException();
-        }
-
-        if (fileOrDirectory.isDirectory()) {
-            tryDeleteDirectory(fileOrDirectory);
-        } else {
-            tryDeleteFile(fileOrDirectory);
-        }
-    }
-
-    private void tryDeleteDirectory(@NonNull File directory) {
-        File[] files = directory.listFiles();
-        for (File fileOrDirectory : files) {
-            tryDeleteFileOrDirectory(fileOrDirectory);
-        }
-
-        boolean isDirectoryDeleted = directory.delete();
-        if (!isDirectoryDeleted) {
-            throw new DeleteDirectoryException();
-        }
-    }
-
-    private void tryDeleteFile(@NonNull File file) {
-        boolean isFileDeleted = file.delete();
-        if (!isFileDeleted) {
-            throw new DeleteFileException();
-        }
+        DeleteUtil.delete(fileOrDirectory);
     }
 
 
