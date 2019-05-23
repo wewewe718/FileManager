@@ -129,6 +129,7 @@ public class DirectoryViewModel extends ViewModel {
                 .subscribe(
                         () -> {
                             isCopyDialogVisible.onNext(false);
+                            refreshCurrentDirectory();
                             disableCopyMode();
                         },
                         error -> {

@@ -4,8 +4,6 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
-        <item name="actionModeStyle">@style/ActionModeStyle</item>
-        <item name="actionModeCloseDrawable">@drawable/ic_clear</item>
     </style>
 
     <style name="AppThemeNoActionBar" parent="Theme.AppCompat.Light.NoActionBar">
@@ -15,6 +13,7 @@
         <item name="actionModeStyle">@style/ActionModeStyle</item>
         <item name="actionModeCloseDrawable">@drawable/ic_clear</item>
         <item name="windowActionModeOverlay">true</item>
+        <item name="android:actionMenuTextColor">@color/black</item>
     </style>
 
     <style name="ToolbarStyle" parent="Widget.AppCompat.ActionBar">
@@ -22,6 +21,7 @@
 
     <style name="ToolbarTheme" parent="ThemeOverlay.AppCompat.ActionBar">
         <item name="android:textColorPrimary">@color/white</item>
+        <item name="android:textColor">@color/black</item>
     </style>
 
     <style name="ActionModeStyle" parent="Base.Widget.AppCompat.ActionMode">

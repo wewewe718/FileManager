@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 import com.example.filemanager.model.exception.CopyFileException;
 import com.example.filemanager.model.exception.CreateDirectoryException;
 import com.example.filemanager.model.exception.CreateFileException;
+import com.example.filemanager.model.exception.FileWithThisNameAlreadyExistsException;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -40,9 +41,11 @@ public class CopyUtil {
             }
         }
 
-        if (!destFile.exists()) {
-            createFile(destFile);
+        if (destFile.exists()) {
+            throw new FileWithThisNameAlreadyExistsException();
         }
+
+        createFile(destFile);
 
         try (
                 FileChannel source = new FileInputStream(sourceFile).getChannel();
