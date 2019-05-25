@@ -12,7 +12,7 @@ public class DeleteUtil {
 
     public static void delete(@NonNull File fileOrDirectory) {
         if (!fileOrDirectory.exists()) {
-            throw new FileDoesNotExistException();
+            throw new FileDoesNotExistException(fileOrDirectory.getPath());
         }
 
         if (!fileOrDirectory.isDirectory()) {
@@ -25,7 +25,7 @@ public class DeleteUtil {
     private static void deleteFile(@NonNull File file) {
         boolean isFileDeleted = file.delete();
         if (!isFileDeleted) {
-            throw new DeleteFileException();
+            throw new DeleteFileException(file.getPath());
         }
     }
 
@@ -48,7 +48,7 @@ public class DeleteUtil {
     private static void deleteEmptyDirectory(@NonNull File directory) {
         boolean isDirectoryDeleted = directory.delete();
         if (!isDirectoryDeleted) {
-            throw new DeleteDirectoryException();
+            throw new DeleteDirectoryException(directory.getPath());
         }
     }
 }

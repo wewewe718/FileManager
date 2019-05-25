@@ -34,15 +34,16 @@ public class CopyUtil {
     }
 
     private static void copyFile(@NonNull File sourceFile, @NonNull File destFile) {
-        if (!destFile.getParentFile().exists()) {
-            boolean isDirectoryCreated = destFile.getParentFile().mkdirs();
+        File parentDirectory = destFile.getParentFile();
+        if (!parentDirectory.exists()) {
+            boolean isDirectoryCreated = parentDirectory.mkdirs();
             if (!isDirectoryCreated) {
-                throw new CreateDirectoryException();
+                throw new CreateDirectoryException(parentDirectory.getPath());
             }
         }
 
         if (destFile.exists()) {
-            throw new FileWithThisNameAlreadyExistsException();
+            throw new FileWithThisNameAlreadyExistsException(destFile.getPath());
         }
 
         createFile(destFile);

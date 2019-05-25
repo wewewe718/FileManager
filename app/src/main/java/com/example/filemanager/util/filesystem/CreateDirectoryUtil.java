@@ -12,12 +12,12 @@ public class CreateDirectoryUtil {
     public static void createDirectory(@NonNull String rootDirectoryFullPath, @NonNull String newDirectoryName) {
         File directory = new File(rootDirectoryFullPath, newDirectoryName);
         if (directory.exists()) {
-            throw new DirectoryWithThisNameAlreadyExistsException();
+            throw new DirectoryWithThisNameAlreadyExistsException(directory.getPath());
         }
 
         boolean isDirectoryCreated = directory.mkdir();
         if (!isDirectoryCreated) {
-            throw new CreateDirectoryException();
+            throw new CreateDirectoryException(directory.getPath());
         }
     }
 }
